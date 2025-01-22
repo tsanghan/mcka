@@ -14,7 +14,7 @@ apt:
       keyid: A42A415B4677D2D22EB05723CF5E7496F430BBA5
     # Kubernetes
     kubernetes.list:
-      source: "deb [signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+      source: "deb [signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/$REPO_VER/deb/ /"
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436
     # Docker-CE
     docker-ce.list:
@@ -266,9 +266,9 @@ write_files:
       tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz /usr/local/bin/
       #
       popd
-      mkdir -p /home/ubuntu/Projects/kind
-      mkdir -p /home/ubuntu/.local/bin
-      cat <<EOF | tee -a /home/ubuntu/Projects/kind/bashrc
+      mkdir -p /home/$USER/Projects/kind
+      mkdir -p /home/$USER/.local/bin
+      cat <<EOF | tee -a /home/$USER/Projects/kind/bashrc
       #
       alias k=kubectl
       source <(k completion bash)
@@ -280,7 +280,15 @@ write_files:
       complete -o default -F __start_kubectl mk
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/vimrc
+      mkdir /home/$USER/.byobu/
+      cat <<EOF > /home/$USER/.byobu/keybindings.tmux
+      unbind-key -n C-a
+      set -g prefix ^A
+      set -g prefix2 F12
+      bind a send-prefix
+      EOF
+      #
+      cat <<EOF > /home/$USER/Projects/kind/vimrc
       let g:dracula_italic = 0
       packadd! dracula
       syntax enable
@@ -290,17 +298,17 @@ write_files:
       set pastetoggle=<F10>
       EOF
       #
-      mkdir -p /home/ubuntu/.vim/pack/themes/start
-      pushd /home/ubuntu/.vim/pack/themes/start
+      mkdir -p /home/$USER/.vim/pack/themes/start
+      pushd /home/$USER/.vim/pack/themes/start
         git clone -n --depth=1 --filter=tree:0 https://github.com/dracula/vim.git dracula
-        pushd /home/ubuntu/.vim/pack/themes/start/dracula
+        pushd /home/$USER/.vim/pack/themes/start/dracula
           git sparse-checkout set --no-cone after autoload colors docs
           git checkout
           rm -rf .git
         popd
       popd
       #
-      cat <<EOF | tee -a /home/ubuntu/Projects/kind/kind.yaml
+      cat <<EOF | tee -a /home/$USER/Projects/kind/kind.yaml
       kind: Cluster
       apiVersion: kind.x-k8s.io/v1alpha4
       networking:
@@ -315,7 +323,7 @@ write_files:
         image: $DH_NAMESPACE/node:$KINDEST_NODE_VER
       EOF
       #
-      cat <<OUTEOF > /home/ubuntu/.local/bin/metallb.sh
+      cat <<OUTEOF > /home/$USER/.local/bin/metallb.sh
       #!/usr/bin/env bash
       helm repo add metallb https://metallb.github.io/metallb
       # helm install metallb metallb/metallb --namespace metallb-system --create-namespace --set loadBalancerClass=metallb
@@ -344,7 +352,7 @@ write_files:
       EOF
       OUTEOF
       #
-      cat <<EOF > /home/ubuntu/.local/bin/metrics-server.sh
+      cat <<EOF > /home/$USER/.local/bin/metrics-server.sh
       #!/usr/bin/env bash
       helm repo add metrics-server https://kubernetes-sigs.github.io/metrics-server/
       helm install metrics-server metrics-server/metrics-server \\
@@ -355,7 +363,7 @@ write_files:
                    --timeout=180s
       EOF
       #
-      cat <<EOF > /home/ubuntu/.local/bin/ingress-nic.sh
+      cat <<EOF > /home/$USER/.local/bin/ingress-nic.sh
       #!/usr/bin/env bash
       helm repo add nginx-stable https://helm.nginx.com/stable
       helm install main nginx-stable/nginx-ingress \\
@@ -369,7 +377,7 @@ write_files:
         --timeout=90s
       EOF
       #
-      cat <<EOF > /home/ubuntu/.local/bin/ingress-kic.sh
+      cat <<EOF > /home/$USER/.local/bin/ingress-kic.sh
       #!/usr/bin/env bash
       helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
       helm install ingress-nginx ingress-nginx/ingress-nginx \\
@@ -378,7 +386,7 @@ write_files:
         --set controller.ingressClassResource.name=ingress-nginx
       EOF
       #
-      cat <<EOF > /home/ubuntu/.local/bin/cert-manager.sh
+      cat <<EOF > /home/$USER/.local/bin/cert-manager.sh
       #!/usr/bin/env bash
       helm repo add jetstack https://charts.jetstack.io
       helm install \\
@@ -389,7 +397,7 @@ write_files:
         # --set "extraArgs={--enable-gateway-api=true}"
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/ingress.yaml
+      cat <<EOF > /home/$USER/Projects/kind/ingress.yaml
       ---
       apiVersion: networking.k8s.io/v1
       kind: Ingress
@@ -419,7 +427,7 @@ write_files:
               pathType: Prefix
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/ingress-tls.yaml
+      cat <<EOF > /home/$USER/Projects/kind/ingress-tls.yaml
       ---
       apiVersion: networking.k8s.io/v1
       kind: Ingress
@@ -453,7 +461,7 @@ write_files:
           secretName: kopi-teh
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/san.cnf
+      cat <<EOF > /home/$USER/Projects/kind/san.cnf
       [req]
       distinguished_name = req_distinguished_name
       x509_extensions = v3_req
@@ -475,7 +483,7 @@ write_files:
       DNS.3 = www.tea.io
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/selfsigned-issuer.yaml
+      cat <<EOF > /home/$USER/Projects/kind/selfsigned-issuer.yaml
       ---
       apiVersion: cert-manager.io/v1
       kind: Issuer
@@ -486,7 +494,7 @@ write_files:
         selfSigned: {}
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/ca-certificate.yaml
+      cat <<EOF > /home/$USER/Projects/kind/ca-certificate.yaml
       ---
       apiVersion: cert-manager.io/v1
       kind: Certificate
@@ -506,7 +514,7 @@ write_files:
           group: cert-manager.io
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/ca-issuer.yaml
+      cat <<EOF > /home/$USER/Projects/kind/ca-issuer.yaml
       ---
       apiVersion: cert-manager.io/v1
       kind: Issuer
@@ -518,7 +526,7 @@ write_files:
           secretName: root-secret
       EOF
       #
-      cat <<EOF > /home/ubuntu/Projects/kind/ca-cluster-issuer.yaml
+      cat <<EOF > /home/$USER/Projects/kind/ca-cluster-issuer.yaml
       ---
       apiVersion: cert-manager.io/v1
       kind: ClusterIssuer
@@ -529,9 +537,9 @@ write_files:
           secretName: root-secret
       EOF
       # k9s skin
-      mkdir -p /home/ubuntu/.config/k9s/skins/
-      curl -sSL https://raw.githubusercontent.com/derailed/k9s/master/skins/monokai.yaml -o /home/ubuntu/.config/k9s/skins/monokai.yaml
-      cat <<EOF > /home/ubuntu/.config/k9s/config.yaml
+      mkdir -p /home/$USER/.config/k9s/skins/
+      curl -sSL https://raw.githubusercontent.com/derailed/k9s/master/skins/monokai.yaml -o /home/$USER/.config/k9s/skins/monokai.yaml
+      cat <<EOF > /home/$USER/.config/k9s/config.yaml
       k9s:
         liveViewAutoRefresh: false
         refreshRate: 2
@@ -574,12 +582,12 @@ write_files:
             warn: 70
       EOF
       #
-      chmod +x /home/ubuntu/.local/bin/*
+      chmod +x /home/$USER/.local/bin/*
       #
-      cat /home/ubuntu/Projects/kind/bashrc >> /home/ubuntu/.bashrc
-      cp /home/ubuntu/Projects/kind/vimrc /home/ubuntu/.vimrc
+      cat /home/$USER/Projects/kind/bashrc >> /home/$USER/.bashrc
+      cp /home/$USER/Projects/kind/vimrc /home/$USER/.vimrc
       #
-      chown -R ubuntu:ubuntu /home/ubuntu
+      chown -R ubuntu:ubuntu /home/$USER
   owner: root:root
   path: /usr/local/bin/1-setup.sh
   permissions: "0755"

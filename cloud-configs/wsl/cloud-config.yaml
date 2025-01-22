@@ -106,9 +106,9 @@ byobu_by_default: enable-system
 # respective key in /root/.ssh/authorized_keys if disable_root is true
 # see 'man authorized_keys' for more information on what you can do here
 #
-# The string '$USER' will be replaced with the username of the default user
+# The string 'student' will be replaced with the username of the default user
 #
-# disable_root_opts: no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"$USER\" rather than the user \"root\".';echo;sleep 10"
+# disable_root_opts: no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"student\" rather than the user \"root\".';echo;sleep 10"
 
 # set the locale to a given locale
 # default: en_US.UTF-8
@@ -277,6 +277,14 @@ write_files:
       alias mk=minikube
       source <(minikube completion bash)
       complete -o default -F __start_kubectl mk
+      EOF
+      #
+      mkdir /home/student/.byobu/
+      cat <<EOF > /home/student/.byobu/keybindings.tmux
+      unbind-key -n C-a
+      set -g prefix ^A
+      set -g prefix2 F12
+      bind a send-prefix
       EOF
       #
       cat <<EOF > /home/student/Projects/kind/vimrc
@@ -579,6 +587,7 @@ write_files:
       cp /home/student/Projects/kind/vimrc /home/student/.vimrc
       #
       chown -R student:student /home/student
+      ip link show | grep br- | awk -F ':' '{print $2}' | tr -d ' ' | while read b; do ip link set "$b" down; ip link delete "$b" type bridge; done
   owner: root:root
   path: /usr/local/bin/1-setup.sh
   permissions: "0755"
@@ -613,10 +622,11 @@ write_files:
 runcmd:
  - apt-get -y purge nano
  - apt-get -y autoremove
+ - /usr/local/bin/1-setup.sh
  - /usr/local/bin/docker-network-kind.sh
  - systemctl restart docker.service
- - /usr/local/bin/1-setup.sh
  - docker pull tsanghan/node:v1.32.1@sha256:d9efeddda2a4b4c1b66261298bb52f4932093e215b09135d3f31801ec35474bd
+
 
 
 ## poweroff or reboot system after finished

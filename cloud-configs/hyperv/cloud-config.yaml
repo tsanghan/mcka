@@ -107,9 +107,9 @@ byobu_by_default: enable-system
 # respective key in /root/.ssh/authorized_keys if disable_root is true
 # see 'man authorized_keys' for more information on what you can do here
 #
-# The string '$USER' will be replaced with the username of the default user
+# The string 'ubuntu' will be replaced with the username of the default user
 #
-# disable_root_opts: no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"$USER\" rather than the user \"root\".';echo;sleep 10"
+# disable_root_opts: no-port-forwarding,no-agent-forwarding,no-X11-forwarding,command="echo 'Please login as the user \"ubuntu\" rather than the user \"root\".';echo;sleep 10"
 
 # set the locale to a given locale
 # default: en_US.UTF-8
@@ -278,6 +278,14 @@ write_files:
       alias mk=minikube
       source <(minikube completion bash)
       complete -o default -F __start_kubectl mk
+      EOF
+      #
+      mkdir /home/ubuntu/.byobu/
+      cat <<EOF > /home/ubuntu/.byobu/keybindings.tmux
+      unbind-key -n C-a
+      set -g prefix ^A
+      set -g prefix2 F12
+      bind a send-prefix
       EOF
       #
       cat <<EOF > /home/ubuntu/Projects/kind/vimrc
