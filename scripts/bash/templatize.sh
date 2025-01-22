@@ -21,25 +21,32 @@ if [[ "$?" = 2 ]]; then
 fi
 
 KUBECTL_VER=${KINDEST_NODE_VER:1}
+REPO_VER=${KINDEST_NODE_VER::-2}
 KINDEST_NODE_HASH=$(curl -s https://hub.docker.com/v2/namespaces/"$DH_NAMESPACE"/repositories/node/tags \
                     | jq -r --arg KINDEST_NODE_VER "$KINDEST_NODE_VER" '.results[] | select(.name==$KINDEST_NODE_VER) | .images[] | select(.architecture=="amd64") | .digest')
 
 KINDEST_NODE_VER=$KINDEST_NODE_VER@$KINDEST_NODE_HASH
 
-export DH_NAMESPACE KINDEST_NODE_VER KUBECTL_VER
+export DH_NAMESPACE KINDEST_NODE_VER KUBECTL_VER REPO_VER
 
 pushd ../../templates
 
-envsubst '$PASSWORD:
+export USER=ubuntu
+envsubst '$USER:
+          $PASSWORD:
           $SSH_AUTHORIZED_KEYS:
           $DH_NAMESPACE:
           $KINDEST_NODE_VER:
-          $KUBECTL_VER' \
+          $KUBECTL_VER:
+          $REPO_VER' \
           < cloud-config-hyperv.tmpl > ../cloud-configs/hyperv/cloud-config.yaml
-envsubst '$PASSWORD:
+export USER=student
+envsubst '$USER:
+          $PASSWORD:
           $DH_NAMESPACE:
           $KINDEST_NODE_VER:
-          $KUBECTL_VER' \
+          $KUBECTL_VER
+          $REPO_VER' \
           < cloud-config-wsl.tmpl > ../cloud-configs/wsl/cloud-config.yaml
 
 
