@@ -76,8 +76,6 @@ users:
     shell: /bin/bash
     # sudo: ALL=(ALL) ALL
     sudo: ALL=(ALL) NOPASSWD:ALL
-    # ssh_authorized_keys:
-    #   - $SSH_AUTHORIZED_KEYS
 
 # Enable PasswordAuthentication in /etc/ssh/sshd_config
 ssh_pwauth: true
@@ -254,6 +252,17 @@ write_files:
       curl -LO https://github.com/mikefarah/yq/releases/latest/download/checksums
       echo "$(grep linux checksums | grep amd | grep -v tar | awk '{print $19}')  yq_linux_amd64" | sha256sum --check
       install -o root -g root -m 0755 yq_linux_amd64 /usr/local/bin/yq
+      # cilium_cli
+      CLI_ARCH=amd64
+      CILIUM_CLI_VERSION=$(curl -sSL https://api.github.com/repos/cilium/cilium-cli/releases/latest | jq -Mr '.tag_name')
+      curl -sL --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/"$CILIUM_CLI_VERSION"/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+      sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+      tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin/
+      HUBBLE_VERSION="{{ versions.HUBBLE_VERSION }}"
+      HUBBLE_ARCH=amd64
+      curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum}
+      sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum
+      tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz /usr/local/bin/
       #
       popd
       mkdir -p /home/student/Projects/kind
@@ -507,7 +516,7 @@ write_files:
         ca:
           secretName: root-secret
       EOF
-
+      #
       cat <<EOF > /home/student/Projects/kind/ca-cluster-issuer.yaml
       ---
       apiVersion: cert-manager.io/v1
@@ -517,6 +526,51 @@ write_files:
       spec:
         ca:
           secretName: root-secret
+      EOF
+      # k9s skin
+      mkdir -p /home/student/.config/k9s/skins/
+      curl -sSL https://raw.githubusercontent.com/derailed/k9s/master/skins/monokai.yaml -o /home/student/.config/k9s/skins/monokai.yaml
+      cat <<EOF > /home/student/.config/k9s/config.yaml
+      k9s:
+        liveViewAutoRefresh: false
+        refreshRate: 2
+        maxConnRetry: 5
+        readOnly: false
+        noExitOnCtrlC: false
+        ui:
+          enableMouse: false
+          headless: true
+          logoless: true
+          crumbsless: true
+          noIcons: false
+          skin: monokai
+        skipLatestRevCheck: false
+        disablePodCounting: false
+        shellPod:
+          image: busybox:1.35.0
+          namespace: default
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        imageScans:
+          enable: false
+          exclusions:
+            namespaces: []
+            labels: {}
+        logger:
+          tail: 100
+          buffer: 5000
+          sinceSeconds: -1
+          fullScreen: false
+          textWrap: false
+          showTime: false
+        thresholds:
+          cpu:
+            critical: 90
+            warn: 70
+          memory:
+            critical: 90
+            warn: 70
       EOF
       #
       chmod +x /home/student/.local/bin/*
@@ -562,6 +616,7 @@ runcmd:
  - /usr/local/bin/docker-network-kind.sh
  - systemctl restart docker.service
  - /usr/local/bin/1-setup.sh
+ - docker pull tsanghan/node:v1.32.1@sha256:d9efeddda2a4b4c1b66261298bb52f4932093e215b09135d3f31801ec35474bd
 
 
 ## poweroff or reboot system after finished
