@@ -39,7 +39,7 @@ envsubst '$USER:
           $KINDEST_NODE_VER:
           $KUBECTL_VER:
           $REPO_VER' \
-          < cloud-config-hyperv.tmpl > ../cloud-configs/hyperv/cloud-config.yaml
+          < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config-hyperv.yaml
 export USER=student
 envsubst '$USER:
           $PASSWORD:
@@ -47,7 +47,7 @@ envsubst '$USER:
           $KINDEST_NODE_VER:
           $KUBECTL_VER
           $REPO_VER' \
-          < cloud-config-wsl.tmpl > ../cloud-configs/wsl/cloud-config.yaml
+          < cloud-config-wsl.tmpl > ../cloud-configs/cloud-config-wsl.yaml
 
 
 popd
