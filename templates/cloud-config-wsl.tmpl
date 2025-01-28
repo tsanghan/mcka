@@ -267,6 +267,41 @@ write_files:
       popd
       mkdir -p /home/$USER/Projects/kind
       mkdir -p /home/$USER/.local/bin
+      #
+      # fzf
+      FZF_VER=$(curl -sSL https://api.github.com/repos/junegunn/fzf/releases/latest | jq -Mr '.tag_name')
+      curl -sSL https://github.com/junegunn/fzf/releases/download/"$FZF_VER"/fzf-"${FZF_VER:1}"-linux_amd64.tar.gz | tar -C /home/$USER/.local/bin -zxvf - fzf
+      mkdir -p /home/$USER/.config/fzf/shell
+      cat <<EOF > /home/$USER/.config/fzf/fzf.bash
+      # Auto-completion
+      # ---------------
+      [[ $- == *i* ]] && source "/home/$USER/.config/fzf/shell/completion.bash" 2> /dev/null
+
+      # Key bindings
+      # ------------
+      source "/home/$USER/.config/fzf/shell/key-bindings.bash"
+      EOF
+      cat <<'EOF' > /home/$USER/.local/bin/enable-fzf.sh
+      printf "\n[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash #fzf-enabled#" >> "$HOME/.bashrc"
+
+      echo
+      echo "You will need to reload your shell configuration for this to take effect..."
+      echo "  . ~/.bashrc"
+      echo
+      EOF
+      cat <<'EOF' > /home/$USER/.local/bin/disable-fzf.sh
+      sed -i -e "/#fzf-enabled#$/d" "$HOME/.bashrc"
+
+      echo
+      echo "You will need to reload your shell configuration for this to take effect..."
+      echo "  . ~/.bashrc"
+      echo
+      EOF
+      pushd /home/$USER/.config/fzf/shell
+      curl -sSLO https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.bash
+      curl -sSLO https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.bash
+      popd
+      #
       cat <<EOF | tee -a /home/$USER/Projects/kind/bashrc
       #
       alias k=kubectl

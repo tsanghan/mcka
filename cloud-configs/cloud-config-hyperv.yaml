@@ -268,6 +268,41 @@ write_files:
       popd
       mkdir -p /home/ubuntu/Projects/kind
       mkdir -p /home/ubuntu/.local/bin
+      #
+      # fzf
+      FZF_VER=$(curl -sSL https://api.github.com/repos/junegunn/fzf/releases/latest | jq -Mr '.tag_name')
+      curl -sSL https://github.com/junegunn/fzf/releases/download/"$FZF_VER"/fzf-"${FZF_VER:1}"-linux_amd64.tar.gz | tar -C /home/ubuntu/.local/bin -zxvf - fzf
+      mkdir -p /home/ubuntu/.config/fzf/shell
+      cat <<EOF > /home/ubuntu/.config/fzf/fzf.bash
+      # Auto-completion
+      # ---------------
+      [[ $- == *i* ]] && source "/home/ubuntu/.config/fzf/shell/completion.bash" 2> /dev/null
+
+      # Key bindings
+      # ------------
+      source "/home/ubuntu/.config/fzf/shell/key-bindings.bash"
+      EOF
+      cat <<'EOF' > /home/ubuntu/.local/bin/enable-fzf.sh
+      printf "\n[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash #fzf-enabled#" >> "$HOME/.bashrc"
+
+      echo
+      echo "You will need to reload your shell configuration for this to take effect..."
+      echo "  . ~/.bashrc"
+      echo
+      EOF
+      cat <<'EOF' > /home/ubuntu/.local/bin/disable-fzf.sh
+      sed -i -e "/#fzf-enabled#$/d" "$HOME/.bashrc"
+
+      echo
+      echo "You will need to reload your shell configuration for this to take effect..."
+      echo "  . ~/.bashrc"
+      echo
+      EOF
+      pushd /home/ubuntu/.config/fzf/shell
+      curl -sSLO https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.bash
+      curl -sSLO https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.bash
+      popd
+      #
       cat <<EOF | tee -a /home/ubuntu/Projects/kind/bashrc
       #
       alias k=kubectl
@@ -316,11 +351,11 @@ write_files:
         podSubnet: 192.168.0.0/16 # set to Calico's default subnet
       nodes:
       - role: control-plane
-        image: tsanghan/node:v1.32.1@sha256:d9efeddda2a4b4c1b66261298bb52f4932093e215b09135d3f31801ec35474bd
+        image: kindest/node:v1.32.1@sha256:c315da1de24c5094dcee18fdc06f43411a03f738dfdea5adc88f05f292794471
       - role: worker
-        image: tsanghan/node:v1.32.1@sha256:d9efeddda2a4b4c1b66261298bb52f4932093e215b09135d3f31801ec35474bd
+        image: kindest/node:v1.32.1@sha256:c315da1de24c5094dcee18fdc06f43411a03f738dfdea5adc88f05f292794471
       - role: worker
-        image: tsanghan/node:v1.32.1@sha256:d9efeddda2a4b4c1b66261298bb52f4932093e215b09135d3f31801ec35474bd
+        image: kindest/node:v1.32.1@sha256:c315da1de24c5094dcee18fdc06f43411a03f738dfdea5adc88f05f292794471
       EOF
       #
       cat <<OUTEOF > /home/ubuntu/.local/bin/metallb.sh
@@ -627,8 +662,9 @@ runcmd:
  - /usr/local/bin/1-setup.sh
  - usermod -aG docker ubuntu
  - tar -C /home/ubuntu --exclude ".ssh" -cvf - . | tar -C /home/student -xvf -
+ - sed -i 's/ubuntu/student/' /home/student/.config/fzf/fzf.bash
  - chown -R student:student /home/student
- - docker pull tsanghan/node:v1.32.1@sha256:d9efeddda2a4b4c1b66261298bb52f4932093e215b09135d3f31801ec35474bd
+ - docker pull kindest/node:v1.32.1@sha256:c315da1de24c5094dcee18fdc06f43411a03f738dfdea5adc88f05f292794471
 
 
 ## poweroff or reboot system after finished
