@@ -202,106 +202,76 @@ write_files:
       #!/usr/bin/env bash
 
       pushd /tmp
-      # kubectl
-      curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-      curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
-      echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
-      install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-      # kind
-      curl -LO "https://kind.sigs.k8s.io/dl/$(curl -L -s https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | \
-        jq -Mr '.tag_name')/kind-linux-amd64"
-      curl -LO "https://kind.sigs.k8s.io/dl/$(curl -L -s https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | \
-        jq -Mr '.tag_name')/kind-linux-amd64.sha256sum"
-      echo "$(cat kind-linux-amd64.sha256sum)" | sha256sum --check
-      install -o root -g root -m 0755 kind-linux-amd64 /usr/local/bin/kind
-      # k9s
-      curl -LO "https://github.com/derailed/k9s/releases/download/$(curl -L -s https://api.github.com/repos/derailed/k9s/releases/latest | \
-        jq -Mr '.tag_name')/k9s_Linux_amd64.tar.gz"
-      curl -LO "https://github.com/derailed/k9s/releases/download/$(curl -L -s https://api.github.com/repos/derailed/k9s/releases/latest | \
-        jq -Mr '.tag_name')/checksums.sha256"
-      sha256sum --check --ignore-missing checksums.sha256
-      tar zxvf k9s_Linux_amd64.tar.gz k9s
-      install -o root -g root -m 0755 k9s /usr/local/bin/k9s
-      # helm
-      VERSION=$(curl -L -s https://api.github.com/repos/helm/helm/releases/latest | jq -Mr '.tag_name')
-      curl -LO "https://get.helm.sh/helm-$VERSION-linux-amd64.tar.gz"
-      curl -LO "https://get.helm.sh/helm-$VERSION-linux-amd64.tar.gz.sha256sum"
-      sha256sum --check helm-$VERSION-linux-amd64.tar.gz.sha256sum
-      tar zxvf helm-$VERSION-linux-amd64.tar.gz linux-amd64/helm
-      install -o root -g root -m 0755 linux-amd64/helm /usr/local/bin/helm
-      # zellij
-      curl -LO "https://github.com/zellij-org/zellij/releases/download/$(curl -L -s https://api.github.com/repos/zellij-org/zellij/releases/latest | \
-        jq -Mr '.tag_name')/zellij-x86_64-unknown-linux-musl.tar.gz"
-      curl -LO "https://github.com/zellij-org/zellij/releases/download/$(curl -L -s https://api.github.com/repos/zellij-org/zellij/releases/latest | \
-        jq -Mr '.tag_name')/zellij-x86_64-unknown-linux-musl.sha256sum"
-      tar zxvf zellij-x86_64-unknown-linux-musl.tar.gz zellij
-      sha256sum --check zellij-x86_64-unknown-linux-musl.sha256sum
-      install -o root -g root -m 0755 zellij /usr/local/bin/zellij
-      # minikube
-      curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
-      curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64.sha256
-      echo "$(cat minikube-linux-amd64.sha256)  minikube-linux-amd64" | sha256sum --check
-      install -o root -g root -m 0755 minikube-linux-amd64 /usr/local/bin/minikube
-      # cmctl
-      curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/cmctl_linux_amd64.tar.gz
-      curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/checksums.txt
-      sha256sum --check --ignore-missing checksums.txt
-      tar zxvf cmctl_linux_amd64.tar.gz cmctl
-      install -o root -g root -m 0755 cmctl /usr/local/bin/cmctl
-      # yq
-      curl -LO https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-      curl -LO https://github.com/mikefarah/yq/releases/latest/download/checksums
-      echo "$(grep linux checksums | grep amd | grep -v tar | awk '{print $19}')  yq_linux_amd64" | sha256sum --check
-      install -o root -g root -m 0755 yq_linux_amd64 /usr/local/bin/yq
-      # cilium_cli
-      CLI_ARCH=amd64
-      CILIUM_CLI_VERSION=$(curl -sSL https://api.github.com/repos/cilium/cilium-cli/releases/latest | jq -Mr '.tag_name')
-      curl -sL --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/"$CILIUM_CLI_VERSION"/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
-      sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
-      tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin/
-      HUBBLE_VERSION=$(curl -sSL https://api.github.com/repos/cilium/hubble/releases/latest | jq -Mr '.tag_name')
-      HUBBLE_ARCH=amd64
-      curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum}
-      sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum
-      tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz /usr/local/bin/
-      #
+        # kubectl
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        # kind
+        curl -LO "https://kind.sigs.k8s.io/dl/$(curl -L -s https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | \
+          jq -Mr '.tag_name')/kind-linux-amd64"
+        curl -LO "https://kind.sigs.k8s.io/dl/$(curl -L -s https://api.github.com/repos/kubernetes-sigs/kind/releases/latest | \
+          jq -Mr '.tag_name')/kind-linux-amd64.sha256sum"
+        echo "$(cat kind-linux-amd64.sha256sum)" | sha256sum --check
+        install -o root -g root -m 0755 kind-linux-amd64 /usr/local/bin/kind
+        # k9s
+        curl -LO "https://github.com/derailed/k9s/releases/download/$(curl -L -s https://api.github.com/repos/derailed/k9s/releases/latest | \
+          jq -Mr '.tag_name')/k9s_Linux_amd64.tar.gz"
+        curl -LO "https://github.com/derailed/k9s/releases/download/$(curl -L -s https://api.github.com/repos/derailed/k9s/releases/latest | \
+          jq -Mr '.tag_name')/checksums.sha256"
+        sha256sum --check --ignore-missing checksums.sha256
+        tar zxvf k9s_Linux_amd64.tar.gz k9s
+        install -o root -g root -m 0755 k9s /usr/local/bin/k9s
+        # helm
+        VERSION=$(curl -L -s https://api.github.com/repos/helm/helm/releases/latest | jq -Mr '.tag_name')
+        curl -LO "https://get.helm.sh/helm-$VERSION-linux-amd64.tar.gz"
+        curl -LO "https://get.helm.sh/helm-$VERSION-linux-amd64.tar.gz.sha256sum"
+        sha256sum --check helm-$VERSION-linux-amd64.tar.gz.sha256sum
+        tar zxvf helm-$VERSION-linux-amd64.tar.gz linux-amd64/helm
+        install -o root -g root -m 0755 linux-amd64/helm /usr/local/bin/helm
+        # zellij
+        curl -LO "https://github.com/zellij-org/zellij/releases/download/$(curl -L -s https://api.github.com/repos/zellij-org/zellij/releases/latest | \
+          jq -Mr '.tag_name')/zellij-x86_64-unknown-linux-musl.tar.gz"
+        curl -LO "https://github.com/zellij-org/zellij/releases/download/$(curl -L -s https://api.github.com/repos/zellij-org/zellij/releases/latest | \
+          jq -Mr '.tag_name')/zellij-x86_64-unknown-linux-musl.sha256sum"
+        tar zxvf zellij-x86_64-unknown-linux-musl.tar.gz zellij
+        sha256sum --check zellij-x86_64-unknown-linux-musl.sha256sum
+        install -o root -g root -m 0755 zellij /usr/local/bin/zellij
+        # minikube
+        curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64
+        curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-amd64.sha256
+        echo "$(cat minikube-linux-amd64.sha256)  minikube-linux-amd64" | sha256sum --check
+        install -o root -g root -m 0755 minikube-linux-amd64 /usr/local/bin/minikube
+        # cmctl
+        curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/cmctl_linux_amd64.tar.gz
+        curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/checksums.txt
+        sha256sum --check --ignore-missing checksums.txt
+        tar zxvf cmctl_linux_amd64.tar.gz cmctl
+        install -o root -g root -m 0755 cmctl /usr/local/bin/cmctl
+        # yq
+        curl -LO https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+        curl -LO https://github.com/mikefarah/yq/releases/latest/download/checksums
+        echo "$(grep linux checksums | grep amd | grep -v tar | awk '{print $19}')  yq_linux_amd64" | sha256sum --check
+        install -o root -g root -m 0755 yq_linux_amd64 /usr/local/bin/yq
+        # cilium_cli
+        CLI_ARCH=amd64
+        CILIUM_CLI_VERSION=$(curl -sSL https://api.github.com/repos/cilium/cilium-cli/releases/latest | jq -Mr '.tag_name')
+        curl -sL --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/"$CILIUM_CLI_VERSION"/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+        sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
+        tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin/
+        HUBBLE_VERSION=$(curl -sSL https://api.github.com/repos/cilium/hubble/releases/latest | jq -Mr '.tag_name')
+        HUBBLE_ARCH=amd64
+        curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum}
+        sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum
+        tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz /usr/local/bin/
+        #
       popd
       mkdir -p /home/$USER/Projects/kind
       mkdir -p /home/$USER/.local/bin
       #
       # fzf
       FZF_VER=$(curl -sSL https://api.github.com/repos/junegunn/fzf/releases/latest | jq -Mr '.tag_name')
-      curl -sSL https://github.com/junegunn/fzf/releases/download/"$FZF_VER"/fzf-"${FZF_VER:1}"-linux_amd64.tar.gz | tar -C /home/$USER/.local/bin -zxvf - fzf
-      mkdir -p /home/$USER/.config/fzf/shell
-      cat <<EOF > /home/$USER/.config/fzf/fzf.bash
-      # Auto-completion
-      # ---------------
-      [[ $- == *i* ]] && source "/home/$USER/.config/fzf/shell/completion.bash" 2> /dev/null
-
-      # Key bindings
-      # ------------
-      source "/home/$USER/.config/fzf/shell/key-bindings.bash"
-      EOF
-      cat <<'EOF' > /home/$USER/.local/bin/enable-fzf.sh
-      printf "\n[ -f "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash ] && source "${XDG_CONFIG_HOME:-$HOME/.config}"/fzf/fzf.bash #fzf-enabled#" >> "$HOME/.bashrc"
-
-      echo
-      echo "You will need to reload your shell configuration for this to take effect..."
-      echo "  . ~/.bashrc"
-      echo
-      EOF
-      cat <<'EOF' > /home/$USER/.local/bin/disable-fzf.sh
-      sed -i -e "/#fzf-enabled#$/d" "$HOME/.bashrc"
-
-      echo
-      echo "You will need to reload your shell configuration for this to take effect..."
-      echo "  . ~/.bashrc"
-      echo
-      EOF
-      pushd /home/$USER/.config/fzf/shell
-      curl -sSLO https://raw.githubusercontent.com/junegunn/fzf/master/shell/completion.bash
-      curl -sSLO https://raw.githubusercontent.com/junegunn/fzf/master/shell/key-bindings.bash
-      popd
+      curl -sSL https://github.com/junegunn/fzf/releases/download/"$FZF_VER"/fzf-"${FZF_VER:1}"-linux_amd64.tar.gz | tar -C /usr/local/bin -zxvf - fzf
       #
       cat <<EOF | tee -a /home/$USER/Projects/kind/bashrc
       #
@@ -312,7 +282,8 @@ write_files:
       source <(k9s completion bash)
       alias mk=minikube
       source <(minikube completion bash)
-      complete -o default -F __start_kubectl mk
+      complete -o default -F __start_minikube mk
+      source <(fzf --bash)
       EOF
       #
       mkdir /home/$USER/.byobu/
@@ -662,7 +633,6 @@ runcmd:
  - /usr/local/bin/1-setup.sh
  - usermod -aG docker ubuntu
  - tar -C /home/ubuntu --exclude ".ssh" -cvf - . | tar -C /home/student -xvf -
- - sed -i 's/ubuntu/student/' /home/student/.config/fzf/fzf.bash
  - chown -R student:student /home/student
  - docker pull $DH_NAMESPACE/node:$KINDEST_NODE_VER
 
