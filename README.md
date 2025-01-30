@@ -68,7 +68,7 @@ Output:<br>
 > <pre>wsl --import kind .\kind ubuntu-noble-wsl-amd64-ubuntu.rootfs.tar.gz
 11. You will see the message show below.
 > <pre>Import in progress, this may take a few minutes.
-> <pre>The operation completed successfully.
+> The operation completed successfully.
 12. Next type the following command.
 > <pre>wsl -d kind
 13. You will be droped into a `BASH shell` as `root`.
