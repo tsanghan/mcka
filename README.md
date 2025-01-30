@@ -66,7 +66,7 @@ Output:<br>
 9. I fyou are in CMD, the destination file will be `%userprofile%\.cloud-init\kind.user-data`
 10. Run the following command in Powershell,
 > <pre>wsl --import kind .\kind ubuntu-noble-wsl-amd64-ubuntu.rootfs.tar.gz
-11. You will see the message show below.
+11. You will see the messages show below.
 > <pre>Import in progress, this may take a few minutes.
 > The operation completed successfully.
 12. Next type the following command.
