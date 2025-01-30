@@ -47,12 +47,12 @@ Output:<br>
 > kind create cluster --config kind.yaml
 12. Check your Kubernetes cluster
 > kubectl cluster-info --context kind-kind
-12. To destroy the VM type the following command.
+13. To destroy the VM type the following command.
 > multipass stop kind<br>
 > multipass delete kind<br>
 > multipass purge
-13. For more information on `multipass` command, please do read the documentation at https://canonical.com/multipass/docs
-13. If you wan to customize the automation of the VM creation, `git clone` repository, read Cloud-Init documentaiont at https://cloudinit.readthedocs.io/en/latest/index.html and starting hacking.
+14. For more information on `multipass` command, please do read the documentation at https://canonical.com/multipass/docs
+15. If you wan to customize the automation of this Hyper-V VM, `git clone` this repository, read Cloud-Init documentaiont at https://cloudinit.readthedocs.io/en/latest/index.html and start hacking.
 
 ### For Windows 10
 1. If you are on Windows 10, you will not have access to Hyper-V. However, you still have WSL.
@@ -61,23 +61,27 @@ Output:<br>
 4. Create a new Folder on you Windows 10 file system.
 5. In Powershell, change directory to your new Folder.
 6. Download this file https://cloud-images.ubuntu.com/wsl/noble/current/ubuntu-noble-wsl-amd64-ubuntu.rootfs.tar.gz into your current Folder.
-7. Run the following command in Powershell,
+7. Download this file https://github.com/tsanghan/mcka/releases/latest/download/cloud-config-wsl.yaml
+8. Copy the file `cloud-config-wsl.yaml` to `$HOME\.cloud-init\kind.user-data`
+9. I fyou are in CMD, the destination file will be `%userprofile%\.cloud-init\kind.user-data`
+10. Run the following command in Powershell,
 > wsl --import kind .\kind ubuntu-noble-wsl-amd64-ubuntu.rootfs.tar.gz
-8. You will see the message show below.
+11. You will see the message show below.
 > Import in progress, this may take a few minutes.<br>
 > The operation completed successfully.
-9. Next type the following command.
+12. Next type the following command.
 > wsl -d kind<br>
-10. You will be droped into a `BASH shell` as `root`.
-11. Wait till you are kick off the `BASH shell` and back into `Powershell`.
-12. Bakc at Powershell, they the following command.
+13. You will be droped into a `BASH shell` as `root`.
+14. Wait till you are kick off the `BASH shell` and back into `Powershell`.
+15. Bakc at Powershell, they the following command.
 > wsl -d kind -u student --cd ~
-13. You are starting up your new WSL distribution and login as `student` and will will be place into `student`'s HOME directory.
-14. In WSL, change directory to `~/Projects/kind`
-15. Type the following command to stand up a multi node Kubernetes cluster.
+16. You are starting up your new WSL distribution and login as `student` and will will be place into `student`'s HOME directory.
+17. In WSL, change directory to `~/Projects/kind`
+18. Type the following command to stand up a multi node Kubernetes cluster.
 > kind create cluster --config kind.yaml
-16. Check your Kubernetes cluster
+19. Check your Kubernetes cluster
 > kubectl cluster-info --context kind-kind
-17. To exit BASH shell, type `Ctrl-d` to go back to `Powershell`
-18. To destroy your WSL distribution.
+20. To exit BASH shell, type `Ctrl-d` to go back to `Powershell`
+21. To destroy your WSL distribution.
 > wsl --unregister kind
+22. If you wan to customize the automation of this Hyper-V VM, `git clone` this repository, read Cloud-Init documentaiont at https://cloudinit.readthedocs.io/en/latest/index.html and start hacking.
