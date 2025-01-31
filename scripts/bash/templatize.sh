@@ -31,7 +31,7 @@ export DH_NAMESPACE KINDEST_NODE_VER KUBECTL_VER REPO_VER
 
 pushd ../../templates
 
-export USER=ubuntu
+export USER=student
 envsubst '$USER:
           $PASSWORD:
           $SSH_AUTHORIZED_KEYS:
@@ -39,15 +39,15 @@ envsubst '$USER:
           $KINDEST_NODE_VER:
           $KUBECTL_VER:
           $REPO_VER' \
-          < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config-hyperv.yaml
-export USER=student
-envsubst '$USER:
-          $PASSWORD:
-          $DH_NAMESPACE:
-          $KINDEST_NODE_VER:
-          $KUBECTL_VER
-          $REPO_VER' \
-          < cloud-config-wsl.tmpl > ../cloud-configs/cloud-config-wsl.yaml
-
+          < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config.yaml
+#          < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config-hyperv.yaml
+# export USER=student
+# envsubst '$USER:
+#           $PASSWORD:
+#           $DH_NAMESPACE:
+#           $KINDEST_NODE_VER:
+#           $KUBECTL_VER
+#           $REPO_VER' \
+#           < cloud-config-wsl.tmpl > ../cloud-configs/cloud-config-wsl.yaml
 
 popd
