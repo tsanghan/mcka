@@ -24,6 +24,10 @@ apt:
     git.list:
       source: "deb [arch=amd64 signed-by=$KEY_FILE] http://ppa.launchpad.net/git-core/ppa/ubuntu $RELEASE main"
       keyid: F911AB184317630C59970973E363C90F8F1B6217
+    # Terraform
+    terraform.list:
+      source: "deb [arch=amd64 signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
+      keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
 
 # Install additional packages on first boot
 #
@@ -41,6 +45,8 @@ packages:
  - docker-ce-cli
  - containerd.io
  - kubectl=$KUBECTL_VER-*
+ - terraform
+ - genisoimage
 
 # Default: true
 # Aliases: apt_update
@@ -74,7 +80,6 @@ users:
     primary_group: student
     groups: docker
     shell: /bin/bash
-    # sudo: ALL=(ALL) ALL
     sudo: ALL=(ALL) NOPASSWD:ALL
 
 # Enable PasswordAuthentication in /etc/ssh/sshd_config
@@ -263,7 +268,20 @@ write_files:
         curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum}
         sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum
         tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz /usr/local/bin/
-        #
+        # govc
+        curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | tar -C /usr/local/bin -xvzf - govc
+        # OpenTofu
+        curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+        chmod +x install-opentofu.sh
+        ./install-opentofu.sh --install-method deb
+        # PowerShell
+        VERSION_ID=$(lsb_release -r | awk '{print $2}')
+        curl -SLO https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb
+        dpkg -i packages-microsoft-prod.deb
+        # Install
+        apt-get update
+        apt-get install -y tofu powershell
+        # yes | pwsh -Command "install-module -name VMware.PowerCLI"
       popd
       mkdir -p /home/$USER/Projects/kind
       mkdir -p /home/$USER/.local/bin
@@ -628,9 +646,10 @@ write_files:
 runcmd:
  - apt-get -y purge nano
  - apt-get -y autoremove
- - /usr/local/bin/1-setup.sh
  - /usr/local/bin/docker-network-kind.sh
  - systemctl restart docker.service
+ - /usr/local/bin/1-setup.sh
+ - chown -R student:student /home/student
  - docker pull $DH_NAMESPACE/node:$KINDEST_NODE_VER
 
 
