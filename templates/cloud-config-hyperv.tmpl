@@ -47,6 +47,7 @@ packages:
  - kubectl=$KUBECTL_VER-*
  - terraform
  - genisoimage
+ - pipx
 
 # Default: true
 # Aliases: apt_update
@@ -284,6 +285,12 @@ write_files:
         apt-get update
         apt-get install -y tofu powershell
         # yes | pwsh -Command "install-module -name VMware.PowerCLI"
+        # direnv
+        export bin_path=/usr/local/bin ; curl -sfL https://direnv.net/install.sh | bash
+        # xh
+        XH_VERSION=$(curl -sSL https://api.github.com/repos/ducaale/xh/releases/latest | jq -Mr '.tag_name')
+        curl -LO https://github.com/ducaale/xh/releases/latest/download/xh_${XH_VERSION:1}_amd64.deb
+        dpkg -i xh_${XH_VERSION:1}_amd64.deb
       popd
       mkdir -p /home/$USER/Projects/kind
       mkdir -p /home/$USER/.local/bin
@@ -292,7 +299,7 @@ write_files:
       FZF_VER=$(curl -sSL https://api.github.com/repos/junegunn/fzf/releases/latest | jq -Mr '.tag_name')
       curl -sSL https://github.com/junegunn/fzf/releases/download/"$FZF_VER"/fzf-"${FZF_VER:1}"-linux_amd64.tar.gz | tar -C /usr/local/bin -zxvf - fzf
       #
-      cat <<EOF | tee -a /home/$USER/Projects/kind/bashrc
+      cat <<'EOF' | tee -a /home/$USER/Projects/kind/bashrc
       #
       alias k=kubectl
       source <(k completion bash)
@@ -303,6 +310,7 @@ write_files:
       source <(minikube completion bash)
       complete -o default -F __start_minikube mk
       source <(fzf --bash)
+      eval "$(direnv hook bash)"
       EOF
       #
       mkdir /home/$USER/.byobu/
@@ -606,14 +614,67 @@ write_files:
             critical: 90
             warn: 70
       EOF
+      chown -R student:student /home/$USER
+      #
+      # pyenv
+      #
+      pushd /home/$USER
+      git clone --depth 1 https://github.com/pyenv/pyenv.git .pyenv
+      PYENV_MODULES=(doctor \
+                    installer \
+                    update \
+                    virtualenv \
+                    which-ext)
+      for module in "${PYENV_MODULES[@]}";
+      do
+        git clone --depth 1 https://github.com/pyenv/pyenv-"$module".git /home/$USER/.pyenv/plugins/pyenv-"$module"
+      done
+      popd
+      echo '#\n# pyenv\n#'
+      echo 'export PYENV_ROOT="${HOME}/.pyenv"' >> /home/$USER/.bashrc
+      echo 'export PATH="${PYENV_ROOT}/shims:${PYENV_ROOT}/bin:$PATH"' >> /home/$USER/.bashrc
+      cat <<'EOF' | tee -a /home/$USER/Projects/kind/bashrc
+
+      function cd {
+          builtin cd "$@"
+          if [ -f "Pipfile" ] ; then
+              pipenv shell
+          fi
+      }
+
+      EOF
+      #
+      # install pyenv dependencies
+      #
+      cat <<'EOF' | tee /home/$USER/.local/bin/install-pyenv-dependencies.sh
+      #!/usr/bin/env bash
+      sudo apt update
+      sudo apt -y install \
+               build-essential \
+               libssl-dev zlib1g-dev \
+               libbz2-dev \
+               libreadline-dev \
+               libsqlite3-dev \
+               curl \
+               git \
+               libncursesw5-dev \
+               xz-utils \
+               tk-dev \
+               libxml2-dev \
+               libxmlsec1-dev \
+               libffi-dev \
+               liblzma-dev
+      EOF
       #
       chmod +x /home/$USER/.local/bin/*
       #
       cat /home/$USER/Projects/kind/bashrc >> /home/$USER/.bashrc
       cp /home/$USER/Projects/kind/vimrc /home/$USER/.vimrc
       #
-      chown -R student:student /home/$USER
+      su -c "pipx install yamllint" - $USER
+      su -c "pipx install pipenv" - $USER
       ip link show | grep br- | awk -F ':' '{print $2}' | tr -d ' ' | while read b; do ip link set "$b" down; ip link delete "$b" type bridge; done
+      #
   owner: root:root
   path: /usr/local/bin/1-setup.sh
   permissions: "0755"
