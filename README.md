@@ -6,6 +6,8 @@
 
 How to use the resources provided here to spin up a single local VM and stand up a multi node Kubernetes cluster for your self upskilling in 40 seconds.
 
+<p align="center"><img src="/assets/mcka-demo.gif?raw=true"/></p>
+
 ### For Windows 10 Pro
 
 1. If you have Windows 10 Pro, enable Hyper-V. Follow instructions at https://learn.microsoft.com/en-us/windows-server/virtualization/hyper-v/get-started/Install-Hyper-V?pivots=windows
@@ -15,17 +17,18 @@ How to use the resources provided here to spin up a single local VM and stand up
 3. Run the following command in Powershell.
 
 > <pre>$Url = 'https://github.com/tsanghan/mcka/releases/latest/download/cloud-config.yaml'
-> $Name = kind
+> $Name = 'kind'
 > multipass launch --cpus 2 --memory 4G --disk 20G --name $Name 24.04 --timeout 1200 --cloud-init $Url
 
 4. You will see the follwing messages,
-> <pre>Creating kind
+> <pre>
+> Creating king
 > Configuring kind
 > Staring kind
 > Waiting for initialization to complete
 > Launched: kind
 
-5. Type the following command to get information on your new Hyper-V VM.
+5. To get information on your new Hyper-V VM.
 > multipass info kind
 
 Output:<br>
@@ -104,3 +107,6 @@ Output:<br>
 13. cilium_cli
 14. govc
 15. PowerShell
+16. pyenv
+17. pipenv
+18. xh
