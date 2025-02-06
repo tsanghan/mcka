@@ -32,13 +32,15 @@ export DH_NAMESPACE KINDEST_NODE_VER KUBECTL_VER REPO_VER
 pushd ../../templates
 
 export USER=student
+export TOKEN=null
 envsubst '$USER:
           $PASSWORD:
           $SSH_AUTHORIZED_KEYS:
           $DH_NAMESPACE:
           $KINDEST_NODE_VER:
           $KUBECTL_VER:
-          $REPO_VER' \
+          $REPO_VER:
+          $TOKEN' \
           < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config.yaml
 #          < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config-hyperv.yaml
 # export USER=student
