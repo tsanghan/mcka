@@ -580,7 +580,7 @@ write_files:
       # EOF
       cat <<'EOF' | tee /home/student/.local/bin/install-tools.sh
       #!/usr/bin/env bash
-      export TOKEN=$TOKEN
+      export TOKEN=null
       for item in \
           direnv \
           kind \
