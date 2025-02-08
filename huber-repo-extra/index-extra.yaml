@@ -6,7 +6,10 @@
   targets:
   - !LinuxAmd64
     artifact_templates:
-    - 'govc_Linux_x86_64.tar.gz '
+    - 'govc_Linux_x86_64.tar.gz'
+  - !LinuxArm64
+    artifact_templates:
+    - 'govc_Linux_arm64.tar.gz'
 - name: fzf
   description: fzf is a general-purpose command-line fuzzy finder.
   source: !Github
@@ -16,6 +19,9 @@
   - !LinuxAmd64
     artifact_templates:
     - 'fzf-{version}-linux_amd64.tar.gz'
+  - !LinuxArm64
+    artifact_templates:
+    - 'fzf-{version}-linux_arm64.tar.gz'
 - name: cilium-cli
   description: cillium commandline utility
   source: !Github
@@ -24,7 +30,10 @@
   targets:
   - !LinuxAmd64
     artifact_templates:
-    - 'cilium-linux-amd64.tar.gz '
+    - 'cilium-linux-amd64.tar.gz'
+  - !LinuxArm64
+    artifact_templates:
+    - 'cilium-linux-arm64.tar.gz'
 - name: cmctl
   description: cmctl is a command line tool that can help you manage cert-manager and its resources inside your cluster.
   source: !Github
@@ -34,3 +43,6 @@
   - !LinuxAmd64
     artifact_templates:
     - 'cmctl_linux_amd64.tar.gz'
+  - !LinuxArm64
+    artifact_templates:
+    - 'cmctl_linux_arm.tar.gz'

@@ -10,23 +10,23 @@ apt:
   sources:
     # Byobu PPA
     byobu-ppa.list:
-      source: "deb [arch=amd64 signed-by=$KEY_FILE] http://ppa.launchpad.net/byobu/ppa/ubuntu focal main"
+      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/byobu/ppa/ubuntu focal main"
       keyid: A42A415B4677D2D22EB05723CF5E7496F430BBA5
     # Kubernetes
     kubernetes.list:
-      source: "deb [signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436
     # Docker-CE
     docker-ce.list:
-      source: "deb [arch=amd64 signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable"
+      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable"
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
     # Git PPA
     git.list:
-      source: "deb [arch=amd64 signed-by=$KEY_FILE] http://ppa.launchpad.net/git-core/ppa/ubuntu $RELEASE main"
+      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/git-core/ppa/ubuntu $RELEASE main"
       keyid: F911AB184317630C59970973E363C90F8F1B6217
     # Terraform
     terraform.list:
-      source: "deb [arch=amd64 signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
+      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
       keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
 
 # Install additional packages on first boot
@@ -243,6 +243,8 @@ write_files:
       set nu rnu
       autocmd FileType yaml,yml,sh setlocal ts=2 sts=2 sw=2 et ai
       set pastetoggle=<F10>
+      " Allow saving of files as sudo when I forgot to start vim using sudo.
+      cmap w!! w !sudo tee > /dev/null %
       EOF
       #
       mkdir -p /home/student/.vim/pack/themes/start
@@ -740,6 +742,7 @@ write_files:
       VERSION_ID=$(lsb_release -r | awk '{print $2}')
       curl -SLO https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb
       dpkg -i packages-microsoft-prod.deb
+      sed -i 's/,armhf//' /etc/apt/sources.list.d/microsoft-prod.list
       # Install
       apt-get update
       apt-get install -y powershell
