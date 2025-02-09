@@ -14,7 +14,7 @@ apt:
       keyid: A42A415B4677D2D22EB05723CF5E7496F430BBA5
     # Kubernetes
     kubernetes.list:
-      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/$REPO_VER/deb/ /"
+      source: "deb [signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/$REPO_VER/deb/ /"
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436
     # Docker-CE
     docker-ce.list:
@@ -209,6 +209,215 @@ write_files:
 - content: |
       #!/usr/bin/env bash
 
+      pushd /tmp
+        #
+        #  _           _
+        # | |__  _   _| |__   ___ _ __
+        # | '_ \| | | | '_ \ / _ \ '__|
+        # | | | | |_| | |_) |  __/ |
+        # |_| |_|\__,_|_.__/ \___|_|
+        #
+        #
+        su - $USER -c "curl -sfSL https://raw.githubusercontent.com/innobead/huber/main/hack/install.sh | sh -"
+        #
+        #  _          _               _   _
+        # | | ___   _| |__   ___  ___| |_| |
+        # | |/ / | | | '_ \ / _ \/ __| __| |
+        # |   <| |_| | |_) |  __/ (__| |_| |
+        # |_|\_\\__,_|_.__/ \___|\___|\__|_|
+        #
+        #
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$ARCH/kubectl"
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$ARCH/kubectl.sha256"
+        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        #
+        #
+        #  _    _           _
+        # | | _(_)_ __   __| |
+        # | |/ / | '_ \ / _` |
+        # |   <| | | | | (_| |
+        # |_|\_\_|_| |_|\__,_|
+        #
+        #
+        curl -LO "https://kind.sigs.k8s.io/dl/$KIND_VER/kind-linux-$ARCH"
+        curl -LO "https://kind.sigs.k8s.io/dl/$KIND_VER/kind-linux-$ARCH.sha256sum"
+        echo "$(cat kind-linux-$ARCH.sha256sum)" | sha256sum --check
+        install -o root -g root -m 0755 kind-linux-$ARCH /usr/local/bin/kind
+        #
+        #
+        #  _     ___
+        # | | __/ _ \ ___
+        # | |/ / (_) / __|
+        # |   < \__, \__ \
+        # |_|\_\  /_/|___/
+        #
+        #
+        curl -LO "https://github.com/derailed/k9s/releases/download/$K9S_VER/k9s_Linux_$ARCH.tar.gz"
+        curl -LO "https://github.com/derailed/k9s/releases/download/$K9S_VER/checksums.sha256"
+        sha256sum --check --ignore-missing checksums.sha256
+        tar zxvf k9s_Linux_$ARCH.tar.gz k9s
+        install -o root -g root -m 0755 k9s /usr/local/bin/k9s
+        #
+        #
+        #  _          _
+        # | |__   ___| |_ __ ___
+        # | '_ \ / _ \ | '_ ` _ \
+        # | | | |  __/ | | | | | |
+        # |_| |_|\___|_|_| |_| |_|
+        #
+        #
+        curl -LO "https://get.helm.sh/helm-$HELM_VER-linux-$ARCH.tar.gz"
+        curl -LO "https://get.helm.sh/helm-$HELM_VER-linux-$ARCH.tar.gz.sha256sum"
+        sha256sum --check helm-$HELM_VER-linux-$ARCH.tar.gz.sha256sum
+        tar zxvf helm-$HELM_VER-linux-$ARCH.tar.gz linux-$ARCH/helm
+        install -o root -g root -m 0755 linux-$ARCH/helm /usr/local/bin/helm
+        #
+        #
+        #          _ _ _  _
+        #  _______| | (_)(_)
+        # |_  / _ \ | | || |
+        #  / /  __/ | | || |
+        # /___\___|_|_|_|/ |
+        #              |__/
+        #
+        #
+        # curl -LO "https://github.com/zellij-org/zellij/releases/download/$ZELLIJ_VER/zellij-x86_64-unknown-linux-musl.tar.gz"
+        # curl -LO "https://github.com/zellij-org/zellij/releases/download/$ZELLIJ_VER/zellij-x86_64-unknown-linux-musl.sha256sum"
+        # tar zxvf zellij-x86_64-unknown-linux-musl.tar.gz zellij
+        # sha256sum --check zellij-x86_64-unknown-linux-musl.sha256sum
+        # install -o root -g root -m 0755 zellij /usr/local/bin/zellij
+        #
+        #
+        #            _       _ _          _
+        #  _ __ ___ (_)_ __ (_) | ___   _| |__   ___
+        # | '_ ` _ \| | '_ \| | |/ / | | | '_ \ / _ \
+        # | | | | | | | | | | |   <| |_| | |_) |  __/
+        # |_| |_| |_|_|_| |_|_|_|\_\\__,_|_.__/ \___|
+        #
+        #
+        curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-$ARCH
+        curl -LO https://github.com/kubernetes/minikube/releases/latest/download/minikube-linux-$ARCH.sha256
+        echo "$(cat minikube-linux-$ARCH.sha256)  minikube-linux-$ARCH" | sha256sum --check
+        install -o root -g root -m 0755 minikube-linux-$ARCH /usr/local/bin/minikube
+        #
+        #
+        #                      _   _
+        #   ___ _ __ ___   ___| |_| |
+        #  / __| '_ ` _ \ / __| __| |
+        # | (__| | | | | | (__| |_| |
+        #  \___|_| |_| |_|\___|\__|_|
+        #
+        #
+        curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/cmctl_linux_$ARCH.tar.gz
+        curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/checksums.txt
+        sha256sum --check --ignore-missing checksums.txt
+        tar zxvf cmctl_linux_$ARCH.tar.gz cmctl
+        install -o root -g root -m 0755 cmctl /usr/local/bin/cmctl
+        #
+        #
+        #  _   _  __ _
+        # | | | |/ _` |
+        # | |_| | (_| |
+        #  \__, |\__, |
+        #  |___/    |_|
+        #
+        #
+        curl -LO https://github.com/mikefarah/yq/releases/latest/download/yq_linux_$ARCH
+        curl -LO https://github.com/mikefarah/yq/releases/latest/download/checksums
+        echo "$(grep linux checksums | grep amd | grep -v tar | awk '{print $19}')  yq_linux_$ARCH" | sha256sum --check
+        install -o root -g root -m 0755 yq_linux_$ARCH /usr/local/bin/yq
+        #
+        #
+        #       _ _ _                         _ _
+        #   ___(_) (_)_   _ _ __ ___      ___| (_)
+        #  / __| | | | | | | '_ ` _ \    / __| | |
+        # | (__| | | | |_| | | | | | |  | (__| | |
+        #  \___|_|_|_|\__,_|_| |_| |_|___\___|_|_|
+        #                           |_____|
+        #
+        #
+        curl -sL --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/$CILIUM_CLI_VERSION/cilium-linux-$ARCH.tar.gz{,.sha256sum}
+        sha256sum --check cilium-linux-$ARCH.tar.gz.sha256sum
+        tar xzvfC cilium-linux-$ARCH.tar.gz /usr/local/bin/
+        curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-$ARCH.tar.gz{,.sha256sum}
+        sha256sum --check hubble-linux-$ARCH.tar.gz.sha256sum
+        tar xzvfC hubble-linux-$ARCH.tar.gz /usr/local/bin/
+        #
+        #
+        #   __ _  _____   _____
+        #  / _` |/ _ \ \ / / __|
+        # | (_| | (_) \ V / (__
+        #  \__, |\___/ \_/ \___|
+        #  |___/
+        #
+        #
+        curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | tar -C /usr/local/bin -xvzf - govc
+        #
+        #
+        #   ___                 _____      __
+        #  / _ \ _ __   ___ _ _|_   _|__  / _|_   _
+        # | | | | '_ \ / _ \ '_ \| |/ _ \| |_| | | |
+        # | |_| | |_) |  __/ | | | | (_) |  _| |_| |
+        #  \___/| .__/ \___|_| |_|_|\___/|_|  \__,_|
+        #       |_|
+        #
+        #
+        curl --proto '=https' --tlsv1.2 -fsSL https://get.opentofu.org/install-opentofu.sh -o install-opentofu.sh
+        chmod +x install-opentofu.sh
+        ./install-opentofu.sh --install-method deb
+        #
+        #
+        #  ____                        ____  _          _ _
+        # |  _ \ _____      _____ _ __/ ___|| |__   ___| | |
+        # | |_) / _ \ \ /\ / / _ \ '__\___ \| '_ \ / _ \ | |
+        # |  __/ (_) \ V  V /  __/ |   ___) | | | |  __/ | |
+        # |_|   \___/ \_/\_/ \___|_|  |____/|_| |_|\___|_|_|
+        #
+        #
+        VERSION_ID=$(lsb_release -r | awk '{print $2}')
+        curl -SLO https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb
+        dpkg -i packages-microsoft-prod.deb
+        # Install PowerShell & OpenTofu
+        apt-get update
+        apt-get install -y tofu powershell
+        # yes | pwsh -Command "install-module -name VMware.PowerCLI"
+        #
+        #
+        #      _ _
+        #   __| (_)_ __ ___ _ ____   __
+        #  / _` | | '__/ _ \ '_ \ \ / /
+        # | (_| | | | |  __/ | | \ V /
+        #  \__,_|_|_|  \___|_| |_|\_/
+        #
+        #
+        export bin_path=/usr/local/bin ; curl -sfL https://direnv.net/install.sh | bash
+        unset bin_path
+        #
+        #
+        #       _
+        # __  _| |__
+        # \ \/ / '_ \
+        #  >  <| | | |
+        # /_/\_\_| |_|
+        #
+        #
+        # XH_VERSION=$(curl -sSL https://api.github.com/repos/ducaale/xh/releases/latest | jq -Mr '.tag_name')
+        # curl -LO https://github.com/ducaale/xh/releases/latest/download/xh_${XH_VERSION:1}_$ARCH.deb
+        # dpkg -i xh_${XH_VERSION:1}_$ARCH.deb
+        #
+        #
+        #   __     __
+        #  / _|___/ _|
+        # | ||_  / |_
+        # |  _/ /|  _|
+        # |_|/___|_|
+        #
+        #
+        export _FZF_VER=$FZF_VER
+        curl -SL https://github.com/junegunn/fzf/releases/download/"$_FZF_VER"/fzf-"${_FZF_VER:1}"-linux_$ARCH.tar.gz | tar -C /usr/local/bin -zxvf - fzf
+        #
+      popd
       mkdir -p /home/$USER/Projects/kind
       mkdir -p /home/$USER/.local/bin
       #
@@ -225,6 +434,7 @@ write_files:
       complete -o default -F __start_minikube mk
       source <(fzf --bash)
       eval "$(direnv hook bash)"
+      source <(huber completions bash)
       EOF
       #
       mkdir /home/$USER/.byobu/
@@ -243,8 +453,6 @@ write_files:
       set nu rnu
       autocmd FileType yaml,yml,sh setlocal ts=2 sts=2 sw=2 et ai
       set pastetoggle=<F10>
-      " Allow saving of files as sudo when I forgot to start vim using sudo.
-      cmap w!! w !sudo tee > /dev/null %
       EOF
       #
       mkdir -p /home/$USER/.vim/pack/themes/start
@@ -265,11 +473,11 @@ write_files:
         podSubnet: 192.168.0.0/16 # set to Calico's default subnet
       nodes:
       - role: control-plane
-        image: kindest/node:v1.32.1@sha256:c315da1de24c5094dcee18fdc06f43411a03f738dfdea5adc88f05f292794471
+        image: $DH_NAMESPACE/node:$KINDEST_NODE_VER
       - role: worker
-        image: kindest/node:v1.32.1@sha256:c315da1de24c5094dcee18fdc06f43411a03f738dfdea5adc88f05f292794471
+        image: $DH_NAMESPACE/node:$KINDEST_NODE_VER
       - role: worker
-        image: kindest/node:v1.32.1@sha256:c315da1de24c5094dcee18fdc06f43411a03f738dfdea5adc88f05f292794471
+        image: $DH_NAMESPACE/node:$KINDEST_NODE_VER
       EOF
       #
       cat <<OUTEOF > /home/$USER/.local/bin/metallb.sh
@@ -278,9 +486,9 @@ write_files:
       # helm install metallb metallb/metallb --namespace metallb-system --create-namespace --set loadBalancerClass=metallb
       helm install metallb metallb/metallb --namespace metallb-system --create-namespace
       kubectl wait --namespace metallb-system \\
-                    --for=condition=ready pod \\
-                    --selector=app.kubernetes.io/name=metallb \\
-                    --timeout=120s
+                   --for=condition=ready pod \\
+                   --selector=app.kubernetes.io/name=metallb \\
+                   --timeout=120s
       cat <<EOF | kubectl apply -f -
       ---
       apiVersion: metallb.io/v1beta1
@@ -307,9 +515,9 @@ write_files:
       helm install metrics-server metrics-server/metrics-server \\
         --set args={--kubelet-insecure-tls=true}
       kubectl wait --namespace=default \\
-                    --for=condition=ready pod \\
-                    --selector=app.kubernetes.io/instance=metrics-server \\
-                    --timeout=180s
+                   --for=condition=ready pod \\
+                   --selector=app.kubernetes.io/instance=metrics-server \\
+                   --timeout=180s
       EOF
       #
       cat <<EOF > /home/$USER/.local/bin/ingress-nic.sh
@@ -532,85 +740,9 @@ write_files:
             critical: 90
             warn: 70
       EOF
-      chown -R $USER:$USER /home/$USER
+      chown -R student:student /home/$USER
       #
-      #  _           _
-      # | |__  _   _| |__   ___ _ __
-      # | '_ \| | | | '_ \ / _ \ '__|
-      # | | | | |_| | |_) |  __/ |
-      # |_| |_|\__,_|_.__/ \___|_|
-      #
-      #
-      su - $USER -c "curl -sfSL https://raw.githubusercontent.com/innobead/huber/main/hack/install.sh | sh -"
-      # cat <<'EOF' | tee /tmp/index-extra.yaml
-      # - name: govc
-      #   description: A Go library for interacting with VMware vSphere APIs (ESXi and/or vCenter Server). In addition to the vSphere API client, this repository includes - govc
-      #   source: !Github
-      #     owner: vmware
-      #     repo: govmomi
-      #   targets:
-      #   - !LinuxAmd64
-      #     artifact_templates:
-      #     - 'govc_Linux_x86_64.tar.gz '
-      # - name: fzf
-      #   description: fzf is a general-purpose command-line fuzzy finder.
-      #   source: !Github
-      #     owner: junegunn
-      #     repo: fzf
-      #   targets:
-      #   - !LinuxAmd64
-      #     artifact_templates:
-      #     - 'fzf-{version}-linux_amd64.tar.gz'
-      # - name: cilium-cli
-      #   description: cillium commandline utility
-      #   source: !Github
-      #     owner: cilium
-      #     repo: cilium-cli
-      #   targets:
-      #   - !LinuxAmd64
-      #     artifact_templates:
-      #     - 'cilium-linux-amd64.tar.gz '
-      # - name: cmctl
-      #   description: cmctl is a command line tool that can help you manage cert-manager and its resources inside your cluster.
-      #   source: !Github
-      #     owner: cert-manager
-      #     repo: cmctl
-      #   targets:
-      #   - !LinuxAmd64
-      #     artifact_templates:
-      #     - 'cmctl_linux_amd64.tar.gz'
-      # EOF
-      cat <<'EOF' | tee /home/$USER/.local/bin/install-tools.sh
-      #!/usr/bin/env bash
-      export TOKEN=$TOKEN
-      for item in \
-          direnv \
-          kind \
-          k9s \
-          helm \
-          minikube \
-          opentofu \
-          xh \
-          yq \
-          zellij \
-          govc \
-          fzf \
-          cilium-cli \
-          cmctl ;\
-      do huber install $item; done
-      EOF
-      chmod +x /home/$USER/.local/bin/install-tools.sh
-      su --login - $USER -c "export PATH=$PATH:/home/$USER/.huber/bin && \
-                             huber repo add --log-level DEBUG --url 'https://github.com/tsanghan/mcka/releases/latest/download/index-extra.yaml' extra && \
-                             /home/$USER/.local/bin/install-tools.sh"
-      #
-      #
-      #  _ __  _   _  ___ _ ____   __
-      # | '_ \| | | |/ _ \ '_ \ \ / /
-      # | |_) | |_| |  __/ | | \ V /
-      # | .__/ \__, |\___|_| |_|\_/
-      # |_|    |___/
-      #
+      # pyenv
       #
       pushd /home/$USER
         git clone --depth 1 https://github.com/pyenv/pyenv.git .pyenv
@@ -623,10 +755,6 @@ write_files:
         do
           git clone --depth 1 https://github.com/pyenv/pyenv-"$module".git /home/$USER/.pyenv/plugins/pyenv-"$module"
         done
-        echo -e '#\n# pyenv\n#' | tee -a .bashrc
-        echo 'export PYENV_ROOT="$HOME/.pyenv"' | tee -a .bashrc
-        echo '[[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"' | tee -a .bashrc
-        echo 'eval "$(pyenv init - bash)"' | tee -a .bashrc
       popd
 
       cat <<'EOF' | tee -a /home/$USER/Projects/kind/bashrc
@@ -638,6 +766,18 @@ write_files:
           fi
       }
 
+      function ghrl {
+        curl -L \
+          -H "Accept: application/vnd.github+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/rate_limit
+      }
+
+      function dhrl {
+        TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+        curl -sI -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep -i RateLimit
+      }
+
       EOF
       #
       # install pyenv dependencies
@@ -646,20 +786,20 @@ write_files:
       #!/usr/bin/env bash
       sudo apt update
       sudo apt -y install \
-                build-essential \
-                libssl-dev zlib1g-dev \
-                libbz2-dev \
-                libreadline-dev \
-                libsqlite3-dev \
-                curl \
-                git \
-                libncursesw5-dev \
-                xz-utils \
-                tk-dev \
-                libxml2-dev \
-                libxmlsec1-dev \
-                libffi-dev \
-                liblzma-dev
+               build-essential \
+               libssl-dev zlib1g-dev \
+               libbz2-dev \
+               libreadline-dev \
+               libsqlite3-dev \
+               curl \
+               git \
+               libncursesw5-dev \
+               xz-utils \
+               tk-dev \
+               libxml2-dev \
+               libxmlsec1-dev \
+               libffi-dev \
+               liblzma-dev
       EOF
       #
       chmod +x /home/$USER/.local/bin/*
@@ -669,85 +809,7 @@ write_files:
       #
       su -c "pipx install yamllint" - $USER
       su -c "pipx install pipenv" - $USER
-      #
       ip link show | grep br- | awk -F ':' '{print $2}' | tr -d ' ' | while read b; do ip link set "$b" down; ip link delete "$b" type bridge; done
-      #
-      pushd /tmp
-      #
-      #
-      #                      _   _
-      #   ___ _ __ ___   ___| |_| |
-      #  / __| '_ ` _ \ / __| __| |
-      # | (__| | | | | | (__| |_| |
-      #  \___|_| |_| |_|\___|\__|_|
-      #
-      #
-      # curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/cmctl_linux_amd64.tar.gz
-      # curl -LO https://github.com/cert-manager/cmctl/releases/latest/download/checksums.txt
-      # sha256sum --check --ignore-missing checksums.txt
-      # tar zxvf cmctl_linux_amd64.tar.gz cmctl
-      # install -o root -g root -m 0755 cmctl /usr/local/bin/cmctl
-      #
-      #
-      #       _ _ _                         _ _
-      #   ___(_) (_)_   _ _ __ ___      ___| (_)
-      #  / __| | | | | | | '_ ` _ \    / __| | |
-      # | (__| | | | |_| | | | | | |  | (__| | |
-      #  \___|_|_|_|\__,_|_| |_| |_|___\___|_|_|
-      #                           |_____|
-      #
-      #
-      # CLI_ARCH=amd64
-      # CILIUM_CLI_VERSION=$(curl -sSL https://api.github.com/repos/cilium/cilium-cli/releases/latest | jq -Mr '.tag_name')
-      # curl -sL --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/"$CILIUM_CLI_VERSION"/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
-      # sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
-      # tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin/
-      # HUBBLE_VERSION=$(curl -sSL https://api.github.com/repos/cilium/hubble/releases/latest | jq -Mr '.tag_name')
-      # HUBBLE_ARCH=amd64
-      # curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/$HUBBLE_VERSION/hubble-linux-${HUBBLE_ARCH}.tar.gz{,.sha256sum}
-      # sha256sum --check hubble-linux-${HUBBLE_ARCH}.tar.gz.sha256sum
-      # tar xzvfC hubble-linux-${HUBBLE_ARCH}.tar.gz /usr/local/bin/
-      #
-      #
-      #   __     __
-      #  / _|___/ _|
-      # | ||_  / |_
-      # |  _/ /|  _|
-      # |_|/___|_|
-      #
-      #
-      # figlet fzf
-      # FZF_VER=$(curl -sSL https://api.github.com/repos/junegunn/fzf/releases/latest | jq -Mr '.tag_name')
-      # curl -SL https://github.com/junegunn/fzf/releases/download/"$FZF_VER"/fzf-"${FZF_VER:1}"-linux_amd64.tar.gz | tar -C /usr/local/bin -zxvf - fzf
-      #
-      #
-      #   __ _  _____   _____
-      #  / _` |/ _ \ \ / / __|
-      # | (_| | (_) \ V / (__
-      #  \__, |\___/ \_/ \___|
-      #  |___/
-      #
-      #
-      # curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | tar -C /usr/local/bin -xvzf - govc
-      #
-      #
-      #
-      #  ____                        ____  _          _ _
-      # |  _ \ _____      _____ _ __/ ___|| |__   ___| | |
-      # | |_) / _ \ \ /\ / / _ \ '__\___ \| '_ \ / _ \ | |
-      # |  __/ (_) \ V  V /  __/ |   ___) | | | |  __/ | |
-      # |_|   \___/ \_/\_/ \___|_|  |____/|_| |_|\___|_|_|
-      #
-      #
-      VERSION_ID=$(lsb_release -r | awk '{print $2}')
-      curl -SLO https://packages.microsoft.com/config/ubuntu/$VERSION_ID/packages-microsoft-prod.deb
-      dpkg -i packages-microsoft-prod.deb
-      sed -i 's/,armhf//' /etc/apt/sources.list.d/microsoft-prod.list
-      # Install
-      apt-get update
-      apt-get install -y powershell
-      # yes | pwsh -Command "install-module -name VMware.PowerCLI"
-      popd
       #
       sed -i 's@\(^export PATH=$HOME/.huber/bin:$PATH$\)@[ "${PATH#*$HOME/.huber/bin:}" == "$PATH" ] \&\& \1@' /home/$USER/.bashrc
       sed -i 's@\(^\[\[ -d $PYENV_ROOT/bin \]\] \&\& export PATH="$PYENV_ROOT/bin:$PATH"$\)@[ "${PATH#*$PYENV_ROOT/bin:}" == "$PATH" ] \&\& \1@' /home/$USER/.bashrc
