@@ -1,3 +1,6 @@
 .envrc
 .env
+.versionsrc.sh
 local*
+vars
+get_versions.sh

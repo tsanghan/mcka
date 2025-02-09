@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source ./utils.sh
+source ./.versionsrc.sh
 
 export SSH_AUTHORIZED_KEYS="ssh-ed25519 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 export PASSWORD=student
@@ -33,23 +34,38 @@ pushd ../../templates
 
 export USER=student
 export TOKEN=null
-envsubst '$USER:
+export ARCH=amd64
+envsubst '$ARCH:
+          $USER:
           $PASSWORD:
           $SSH_AUTHORIZED_KEYS:
           $DH_NAMESPACE:
           $KINDEST_NODE_VER:
           $KUBECTL_VER:
           $REPO_VER:
-          $TOKEN' \
+          $TOKEN:
+          $KIND_VER:
+          $HELM_VER:
+          $CILIUM_CLI_VERSION:
+          $HUBBLE_VERSION:
+          $FZF_VER:
+          $K9S_VER' \
           < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config.yaml
-#          < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config-hyperv.yaml
-# export USER=student
-# envsubst '$USER:
-#           $PASSWORD:
-#           $DH_NAMESPACE:
-#           $KINDEST_NODE_VER:
-#           $KUBECTL_VER
-#           $REPO_VER' \
-#           < cloud-config-wsl.tmpl > ../cloud-configs/cloud-config-wsl.yaml
-
+export ARCH=arm64
+envsubst '$ARCH:
+          $USER:
+          $PASSWORD:
+          $SSH_AUTHORIZED_KEYS:
+          $DH_NAMESPACE:
+          $KINDEST_NODE_VER:
+          $KUBECTL_VER:
+          $REPO_VER:
+          $TOKEN:
+          $KIND_VER:
+          $HELM_VER:
+          $CILIUM_CLI_VERSION:
+          $HUBBLE_VERSION:
+          $FZF_VER: \
+          $K9S_VER' \
+          < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config-arm64.yaml
 popd
