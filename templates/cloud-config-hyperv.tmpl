@@ -9,9 +9,15 @@ apt:
 
   sources:
     # Byobu PPA
-    byobu-ppa.list:
-      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/byobu/ppa/ubuntu focal main"
-      keyid: A42A415B4677D2D22EB05723CF5E7496F430BBA5
+    byobu-ppa:
+      source: "ppa:byobu/ppa"
+      # source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/byobu/ppa/ubuntu focal main"
+      # keyid: A42A415B4677D2D22EB05723CF5E7496F430BBA5
+        # Git PPA
+    git:
+      source: "ppa:git-core/ppa"
+      # source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/git-core/ppa/ubuntu $RELEASE main"
+      # keyid: F911AB184317630C59970973E363C90F8F1B6217
     # Kubernetes
     kubernetes.list:
       source: "deb [signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/$REPO_VER/deb/ /"
@@ -20,14 +26,14 @@ apt:
     docker-ce.list:
       source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable"
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
-    # Git PPA
-    git.list:
-      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/git-core/ppa/ubuntu $RELEASE main"
-      keyid: F911AB184317630C59970973E363C90F8F1B6217
     # Terraform
     terraform.list:
       source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
       keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
+    # GitHub Cli
+    githubcli.list:
+      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://cli.github.com/packages stable main"
+      keyid: 2C6106201985B60E6C7AC87323F3D4EA75716059
 
 # Install additional packages on first boot
 #
@@ -49,6 +55,7 @@ packages:
  - genisoimage
  - pipx
  - figlet
+ - gh
 
 # Default: true
 # Aliases: apt_update
@@ -424,17 +431,18 @@ write_files:
       cat <<'EOF' | tee -a /home/$USER/Projects/kind/bashrc
       #
       alias k=kubectl
+      alias mk=minikube
       source <(k completion bash)
       complete -o default -F __start_kubectl k
       source <(kind completion bash)
       source <(helm completion bash)
       source <(k9s completion bash)
-      alias mk=minikube
+      source <(fzf --bash)
+      source <(huber completions bash)
       source <(minikube completion bash)
       complete -o default -F __start_minikube mk
-      source <(fzf --bash)
       eval "$(direnv hook bash)"
-      source <(huber completions bash)
+      eval "$(gh completion -s bash)"
       EOF
       #
       mkdir /home/$USER/.byobu/
@@ -833,6 +841,12 @@ write_files:
   owner: root:root
   path: /usr/local/bin/docker-network-kind.sh
   permissions: "0755"
+- content: |
+        fs.inotify.max_user_watches = 524288
+        fs.inotify.max_user_instances = 512
+  owner: root:root
+  path: /etc/sysctl.d/99-kind.conf
+  permissions: "0644"
 
 
 # run commands
