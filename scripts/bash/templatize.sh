@@ -15,16 +15,24 @@ TSANGHAN_NODE_VER=$(curl -s https://hub.docker.com/v2/namespaces/tsanghan/reposi
                    | sort -k2 -rn | egrep -v 'alpha|beta' | egrep '^v1\.[0-9]{2}\.[0-9]{1,2}$' | head -1)
 
 DH_NAMESPACE=kindest
+KINDEST_NODE_VER_ARM64="$KINDEST_NODE_VER"
+KINDEST_NODE_VER_AMD64="$KINDEST_NODE_VER"
+KUBECTL_VER=${KINDEST_NODE_VER:1}
+REPO_VER=${KINDEST_NODE_VER::-2}
 vercomp "${KINDEST_NODE_VER:1}" "${TSANGHAN_NODE_VER:1}"
 if [[ "$?" = 2 ]]; then
-    KINDEST_NODE_VER="$TSANGHAN_NODE_VER"
+    KUBECTL_VER=${TSANGHAN_NODE_VER:1}
+    REPO_VER=${TSANGHAN_NODE_VER::-2}
+    KINDEST_NODE_VER_AMD64="$TSANGHAN_NODE_VER"
+    KUBECTL_VER=${TSANGHAN_NODE_VER:1}
     DH_NAMESPACE=tsanghan
 fi
 
-KUBECTL_VER=${KINDEST_NODE_VER:1}
-REPO_VER=${KINDEST_NODE_VER::-2}
+KINDEST_NODE_VER=$KINDEST_NODE_VER_AMD64
 KINDEST_NODE_HASH=$(curl -s https://hub.docker.com/v2/namespaces/"$DH_NAMESPACE"/repositories/node/tags \
-                    | jq -r --arg KINDEST_NODE_VER "$KINDEST_NODE_VER" '.results[] | select(.name==$KINDEST_NODE_VER) | .images[] | select(.architecture=="amd64") | .digest')
+                   | jq -r --arg KINDEST_NODE_VER "$KINDEST_NODE_VER" '.results[] |
+                                                                      select( .name == $KINDEST_NODE_VER) |
+                                                                      .digest')
 
 KINDEST_NODE_VER=$KINDEST_NODE_VER@$KINDEST_NODE_HASH
 
@@ -34,7 +42,9 @@ pushd ../../templates
 
 export USER=student
 export TOKEN=null
+
 export ARCH=amd64
+export KINDEST_NODE_VER=$KINDEST_NODE_VER_AMD64@$KINDEST_NODE_HASH
 envsubst '$ARCH:
           $USER:
           $PASSWORD:
@@ -51,7 +61,16 @@ envsubst '$ARCH:
           $FZF_VER:
           $K9S_VER' \
           < cloud-config-hyperv.tmpl > ../cloud-configs/cloud-config.yaml
+
 export ARCH=arm64
+export DH_NAMESPACE=kindest
+export REPO_VER=${KINDEST_NODE_VER_ARM64::-2}
+export KINDEST_NODE_VER=$KINDEST_NODE_VER_ARM64
+KINDEST_NODE_HASH=$(curl -s https://hub.docker.com/v2/namespaces/"$DH_NAMESPACE"/repositories/node/tags \
+                   | jq -r --arg KINDEST_NODE_VER "$KINDEST_NODE_VER" '.results[] |
+                                                                      select( .name == $KINDEST_NODE_VER) |
+                                                                      .digest')
+export KINDEST_NODE_VER=$KINDEST_NODE_VER@$KINDEST_NODE_HASH
 envsubst '$ARCH:
           $USER:
           $PASSWORD:
