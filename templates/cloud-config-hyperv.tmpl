@@ -849,7 +849,15 @@ write_files:
   owner: root:root
   path: /etc/sysctl.d/99-kind.conf
   permissions: "0644"
-
+- content: |
+        {
+          "features": {
+            "containerd-snapshotter": true
+          }
+        }
+  owner: root:root
+  path: /etc/docker/daemon.json
+  permissions: "0644"
 
 # run commands
 # default: none
