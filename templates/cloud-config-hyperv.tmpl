@@ -53,9 +53,11 @@ packages:
  - kubectl=$KUBECTL_VER-*
  - terraform
  - genisoimage
+ - xorriso
  - pipx
  - figlet
  - gh
+ - make
 
 # Default: true
 # Aliases: apt_update
@@ -234,10 +236,10 @@ write_files:
         # |_|\_\\__,_|_.__/ \___|\___|\__|_|
         #
         #
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$ARCH/kubectl"
-        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$ARCH/kubectl.sha256"
-        echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
-        install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+        # curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$ARCH/kubectl"
+        # curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$ARCH/kubectl.sha256"
+        # echo "$(cat kubectl.sha256)  kubectl" | sha256sum --check
+        # install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
         #
         #
         #  _    _           _
@@ -409,9 +411,9 @@ write_files:
         # /_/\_\_| |_|
         #
         #
-        # XH_VERSION=$(curl -sSL https://api.github.com/repos/ducaale/xh/releases/latest | jq -Mr '.tag_name')
-        # curl -LO https://github.com/ducaale/xh/releases/latest/download/xh_${XH_VERSION:1}_$ARCH.deb
-        # dpkg -i xh_${XH_VERSION:1}_$ARCH.deb
+        XH_VERSION=$(curl -sSL https://api.github.com/repos/ducaale/xh/releases/latest | jq -Mr '.tag_name')
+        curl -LO https://github.com/ducaale/xh/releases/latest/download/xh_${XH_VERSION:1}_$ARCH.deb
+        dpkg -i xh_${XH_VERSION:1}_$ARCH.deb
         #
         #
         #   __     __
@@ -782,8 +784,8 @@ write_files:
       }
 
       function dhrl {
-        TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
-        curl -sI -H "Authorization: Bearer $TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep -i RateLimit
+        DH_TOKEN=$(curl -s "https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull" | jq -r .token)
+        curl -sI -H "Authorization: Bearer $DH_TOKEN" https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest 2>&1 | grep -i RateLimit
       }
 
       EOF

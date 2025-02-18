@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
+cd $(dirname ${BASH_SOURCE})
+
 source ./utils.sh
 source ./.versionsrc.sh
+
+set -e
 
 export SSH_AUTHORIZED_KEYS="ssh-ed25519 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 export PASSWORD=student
