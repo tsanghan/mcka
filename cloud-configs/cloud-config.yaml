@@ -10,10 +10,10 @@ apt:
   sources:
     # Byobu PPA
     byobu-ppa:
-      source: "ppa:byobu/ppa"
-      # source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/byobu/ppa/ubuntu focal main"
-      # keyid: A42A415B4677D2D22EB05723CF5E7496F430BBA5
-        # Git PPA
+      # source: "ppa:byobu/ppa" # not able to specify Release here. Byobu latest release is for Focal and earlier.
+      source: "deb [arch=amd64 signed-by=$KEY_FILE] http://ppa.launchpad.net/byobu/ppa/ubuntu focal main"
+      keyid: A42A415B4677D2D22EB05723CF5E7496F430BBA5
+    # Git PPA
     git:
       source: "ppa:git-core/ppa"
       # source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] http://ppa.launchpad.net/git-core/ppa/ubuntu $RELEASE main"
@@ -24,15 +24,15 @@ apt:
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436
     # Docker-CE
     docker-ce.list:
-      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable"
+      source: "deb [arch=amd64 signed-by=$KEY_FILE] https://download.docker.com/linux/ubuntu $RELEASE stable"
       keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
     # Terraform
     terraform.list:
-      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
+      source: "deb [arch=amd64 signed-by=$KEY_FILE] https://apt.releases.hashicorp.com $RELEASE main"
       keyid: 798AEC654E5C15428C8E42EEAA16FCBCA621E701
     # GitHub Cli
     githubcli.list:
-      source: "deb [arch=amd64,arm64 signed-by=$KEY_FILE] https://cli.github.com/packages stable main"
+      source: "deb [arch=amd64 signed-by=$KEY_FILE] https://cli.github.com/packages stable main"
       keyid: 2C6106201985B60E6C7AC87323F3D4EA75716059
 
 # Install additional packages on first boot
