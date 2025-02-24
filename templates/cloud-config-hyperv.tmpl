@@ -814,7 +814,7 @@ write_files:
       #
       # For containerd v2 remote registries configuration
       #
-      cat <<'EOF' | tee  /home/$USER/.local/bin/containerd-v2-registries.sh
+      cat <<'OUTEOF' | tee  /home/$USER/.local/bin/containerd-v2-registries.sh
       #!/usr/bin/env bash
 
       set -euo pipefail
@@ -834,7 +834,7 @@ write_files:
       EOF
         done
       done
-      EOF
+      OUTEOF
       #
       chmod +x /home/$USER/.local/bin/*
       #
