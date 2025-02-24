@@ -812,6 +812,30 @@ write_files:
                liblzma-dev
       EOF
       #
+      # For containerd v2 remote registries configuration
+      #
+      cat <<'EOF' | tee  /home/$USER/.local/bin/containerd-v2-registries.sh
+      #!/usr/bin/env bash
+
+      set -euo pipefail
+
+      BASE_DIR="/etc/containerd/certs.d"
+      declare -rA 'REGISTRY_DIR=(["docker.io"]="magic:5000" \
+                                ["registry.k8s.io"]="magic:5001" \
+                                ["quay.io"]="magic:5002" \
+                                ["ghcr.io"]="magic:5003" \
+                                ["magic.gs.lab"]="magic:6000")'
+
+      for node in $(kind get nodes); do
+        for key in ${!REGISTRY_DIR[@]}; do
+          docker exec "${node}" mkdir -p "${BASE_DIR}/${key}"
+          cat <<EOF | docker exec -i "${node}" cp /dev/stdin "${BASE_DIR}/${key}/hosts.toml"
+      [host."http://${REGISTRY_DIR[${key}]}"]
+      EOF
+        done
+      done
+      EOF
+      #
       chmod +x /home/$USER/.local/bin/*
       #
       cat /home/$USER/Projects/kind/bashrc >> /home/$USER/.bashrc
