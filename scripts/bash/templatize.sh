@@ -1,22 +1,24 @@
 #!/usr/bin/env bash
 
-cd $(dirname ${BASH_SOURCE})
+cd "$(dirname "${BASH_SOURCE[0]}")"
 
+# shellcheck disable=SC1091
 source ./utils.sh
+# shellcheck disable=SC1091
 source ./.versionsrc.sh
 
-set -e
+#set -e
 
 export SSH_AUTHORIZED_KEYS="ssh-ed25519 XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 export PASSWORD=student
 
 KINDEST_NODE_VER=$(curl -s https://hub.docker.com/v2/namespaces/kindest/repositories/node/tags \
                    | jq -r '.results[].name' \
-                   | sort -k2 -rn | egrep -v 'alpha|beta' | head -1)
+                   | sort -k2 -rn | grep -E -v 'alpha|beta' | head -1)
 
 TSANGHAN_NODE_VER=$(curl -s https://hub.docker.com/v2/namespaces/tsanghan/repositories/node/tags \
                    | jq -r '.results[].name' \
-                   | sort -k2 -rn | egrep -v 'alpha|beta' | egrep '^v1\.[0-9]{2}\.[0-9]{1,2}$' | head -1)
+                   | sort -k2 -rn | grep -E -v 'alpha|beta' | grep -E '^v1\.[0-9]{2}\.[0-9]{1,2}$' | head -1)
 
 DH_NAMESPACE=kindest
 KINDEST_NODE_VER_ARM64="$KINDEST_NODE_VER"
@@ -49,6 +51,7 @@ export TOKEN=null
 
 export ARCH=amd64
 export KINDEST_NODE_VER=$KINDEST_NODE_VER_AMD64@$KINDEST_NODE_HASH
+# shellcheck disable=SC2016
 envsubst '$ARCH:
           $USER:
           $PASSWORD:
@@ -75,6 +78,7 @@ KINDEST_NODE_HASH=$(curl -s https://hub.docker.com/v2/namespaces/"$DH_NAMESPACE"
                                                                       select( .name == $KINDEST_NODE_VER) |
                                                                       .digest')
 export KINDEST_NODE_VER=$KINDEST_NODE_VER@$KINDEST_NODE_HASH
+# shellcheck disable=SC2016
 envsubst '$ARCH:
           $USER:
           $PASSWORD:
