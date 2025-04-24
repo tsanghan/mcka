@@ -882,6 +882,35 @@ write_files:
   owner: root:root
   path: /etc/docker/daemon.json
   permissions: "0644"
+# - content: |
+#         #!/usr/bin/env bash
+
+#         yq '.networking.disableDefaultCNI = true' kind.yaml | kind create cluster --config -
+
+#         containerd-v2-registries.sh
+
+#         docker network rm external internal > /dev/null 2>&1
+
+#         docker network create \
+#           --driver=bridge \
+#           --subnet=172.16.254.0/24 \
+#           --internal \
+#           internal
+
+#         docker network create \
+#           --driver=bridge \
+#           --subnet=10.10.254.0/24 \
+#           --internal \
+#           external
+
+#         for node in $(kind get nodes); do
+#           for network in external internal; do
+#             docker network connect $network $node
+#           done
+#         done
+#   owner: root:root
+#   path: /usr/local/bin/create-kind-cluster-with-containerv_v2.sh
+#   permissions: "0644"
 
 # run commands
 # default: none

@@ -20,7 +20,7 @@ apt:
       # keyid: F911AB184317630C59970973E363C90F8F1B6217
     # Kubernetes
     kubernetes.list:
-      source: "deb [signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+      source: "deb [signed-by=$KEY_FILE] https://pkgs.k8s.io/core:/stable:/v1.33/deb/ /"
       keyid: DE15B14486CD377B9E876E1A234654DA9A296436
     # Docker-CE
     docker-ce.list:
@@ -50,7 +50,7 @@ packages:
  - docker-ce
  - docker-ce-cli
  - containerd.io
- - kubectl=1.32.2-*
+ - kubectl=1.33.0-*
  - terraform
  - genisoimage
  - xorriso
@@ -262,8 +262,8 @@ write_files:
         # |_|\_\  /_/|___/
         #
         #
-        curl -LO "https://github.com/derailed/k9s/releases/download/v0.40.3/k9s_Linux_arm64.tar.gz"
-        curl -LO "https://github.com/derailed/k9s/releases/download/v0.40.3/checksums.sha256"
+        curl -LO "https://github.com/derailed/k9s/releases/download/v0.50.4/k9s_Linux_arm64.tar.gz"
+        curl -LO "https://github.com/derailed/k9s/releases/download/v0.50.4/checksums.sha256"
         sha256sum --check --ignore-missing checksums.sha256
         tar zxvf k9s_Linux_arm64.tar.gz k9s
         install -o root -g root -m 0755 k9s /usr/local/bin/k9s
@@ -276,10 +276,10 @@ write_files:
         # |_| |_|\___|_|_| |_| |_|
         #
         #
-        curl -LO "https://get.helm.sh/helm-v3.17.1-linux-arm64.tar.gz"
-        curl -LO "https://get.helm.sh/helm-v3.17.1-linux-arm64.tar.gz.sha256sum"
-        sha256sum --check helm-v3.17.1-linux-arm64.tar.gz.sha256sum
-        tar zxvf helm-v3.17.1-linux-arm64.tar.gz linux-arm64/helm
+        curl -LO "https://get.helm.sh/helm-v3.17.3-linux-arm64.tar.gz"
+        curl -LO "https://get.helm.sh/helm-v3.17.3-linux-arm64.tar.gz.sha256sum"
+        sha256sum --check helm-v3.17.3-linux-arm64.tar.gz.sha256sum
+        tar zxvf helm-v3.17.3-linux-arm64.tar.gz linux-arm64/helm
         install -o root -g root -m 0755 linux-arm64/helm /usr/local/bin/helm
         #
         #
@@ -346,10 +346,10 @@ write_files:
         #                           |_____|
         #
         #
-        curl -sL --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/v0.16.24/cilium-linux-arm64.tar.gz{,.sha256sum}
+        curl -sL --fail --remote-name-all https://github.com/cilium/cilium-cli/releases/download/v0.18.3/cilium-linux-arm64.tar.gz{,.sha256sum}
         sha256sum --check cilium-linux-arm64.tar.gz.sha256sum
         tar xzvfC cilium-linux-arm64.tar.gz /usr/local/bin/
-        curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/v1.17.1/hubble-linux-arm64.tar.gz{,.sha256sum}
+        curl -L --fail --remote-name-all https://github.com/cilium/hubble/releases/download/v1.17.2/hubble-linux-arm64.tar.gz{,.sha256sum}
         sha256sum --check hubble-linux-arm64.tar.gz.sha256sum
         tar xzvfC hubble-linux-arm64.tar.gz /usr/local/bin/
         #
@@ -423,7 +423,7 @@ write_files:
         # |_|/___|_|
         #
         #
-        export _FZF_VER=v0.60.0
+        export _FZF_VER=v0.61.3
         curl -SL https://github.com/junegunn/fzf/releases/download/"$_FZF_VER"/fzf-"${_FZF_VER:1}"-linux_arm64.tar.gz | tar -C /usr/local/bin -zxvf - fzf
         #
       popd
@@ -483,11 +483,11 @@ write_files:
         podSubnet: 192.168.0.0/16 # set to Calico's default subnet
       nodes:
       - role: control-plane
-        image: kindest/node:v1.32.2@sha256:f226345927d7e348497136874b6d207e0b32cc52154ad8323129352923a3142f
+        image: kindest/node:v1.33.0@sha256:02f73d6ae3f11ad5d543f16736a2cb2a63a300ad60e81dac22099b0b04784a4e
       - role: worker
-        image: kindest/node:v1.32.2@sha256:f226345927d7e348497136874b6d207e0b32cc52154ad8323129352923a3142f
+        image: kindest/node:v1.33.0@sha256:02f73d6ae3f11ad5d543f16736a2cb2a63a300ad60e81dac22099b0b04784a4e
       - role: worker
-        image: kindest/node:v1.32.2@sha256:f226345927d7e348497136874b6d207e0b32cc52154ad8323129352923a3142f
+        image: kindest/node:v1.33.0@sha256:02f73d6ae3f11ad5d543f16736a2cb2a63a300ad60e81dac22099b0b04784a4e
       EOF
       #
       cat <<OUTEOF > /home/student/.local/bin/metallb.sh
@@ -882,6 +882,35 @@ write_files:
   owner: root:root
   path: /etc/docker/daemon.json
   permissions: "0644"
+# - content: |
+#         #!/usr/bin/env bash
+
+#         yq '.networking.disableDefaultCNI = true' kind.yaml | kind create cluster --config -
+
+#         containerd-v2-registries.sh
+
+#         docker network rm external internal > /dev/null 2>&1
+
+#         docker network create \
+#           --driver=bridge \
+#           --subnet=172.16.254.0/24 \
+#           --internal \
+#           internal
+
+#         docker network create \
+#           --driver=bridge \
+#           --subnet=10.10.254.0/24 \
+#           --internal \
+#           external
+
+#         for node in $(kind get nodes); do
+#           for network in external internal; do
+#             docker network connect $network $node
+#           done
+#         done
+#   owner: root:root
+#   path: /usr/local/bin/create-kind-cluster-with-containerv_v2.sh
+#   permissions: "0644"
 
 # run commands
 # default: none
@@ -904,7 +933,7 @@ runcmd:
  # - usermod -aG docker ubuntu
  # - tar -C /home/ubuntu --exclude ".ssh" -cvf - . | tar -C /home/student -xvf -
  - chown -R student:student /home/student
- - docker pull kindest/node:v1.32.2@sha256:f226345927d7e348497136874b6d207e0b32cc52154ad8323129352923a3142f
+ - docker pull kindest/node:v1.33.0@sha256:02f73d6ae3f11ad5d543f16736a2cb2a63a300ad60e81dac22099b0b04784a4e
 
 
 ## poweroff or reboot system after finished
