@@ -58,6 +58,7 @@ packages:
  - figlet
  - gh
  - make
+ - nfs-kernel-server
 
 # Default: true
 # Aliases: apt_update
@@ -426,6 +427,14 @@ write_files:
         export _FZF_VER=$FZF_VER
         curl -SL https://github.com/junegunn/fzf/releases/download/"$_FZF_VER"/fzf-"${_FZF_VER:1}"-linux_$ARCH.tar.gz | tar -C /usr/local/bin -zxvf - fzf
         #
+        #
+        #  _   ___   __
+        # | | | \ \ / /
+        # | |_| |\ V /
+        #  \__,_| \_/
+        #
+        su - $USER -c "NO_MODIFY_PATH=1 curl -LsSf https://astral.sh/uv/install.sh | sh"
+        #
       popd
       mkdir -p /home/$USER/Projects/kind
       mkdir -p /home/$USER/.local/bin
@@ -440,7 +449,9 @@ write_files:
       source <(helm completion bash)
       source <(k9s completion bash)
       source <(fzf --bash)
-      source <(huber completions bash)
+      if command -v huber > /dev/null; then
+        source <(huber completions bash)
+      fi
       source <(minikube completion bash)
       complete -o default -F __start_minikube mk
       eval "$(direnv hook bash)"
@@ -479,8 +490,9 @@ write_files:
       kind: Cluster
       apiVersion: kind.x-k8s.io/v1alpha4
       networking:
-        disableDefaultCNI: false # disable kindnet
+        disableDefaultCNI: false # enable kindnet
         podSubnet: 192.168.0.0/16 # set to Calico's default subnet
+        kubeProxyMode: "nftables" # options: iptables, nftables, none
       nodes:
       - role: control-plane
         image: $DH_NAMESPACE/node:$KINDEST_NODE_VER
@@ -489,6 +501,30 @@ write_files:
       - role: worker
         image: $DH_NAMESPACE/node:$KINDEST_NODE_VER
       EOF
+      #
+      cat <<OUTEOF > /home/student/.local/bin/nfs-storage-class.sh
+      #!/usr/bin/env bash
+      helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts
+      helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version 4.11.0
+      cat <<EOF | kubectl apply -f -
+      apiVersion: storage.k8s.io/v1
+      kind: StorageClass
+      metadata:
+        name: nfs-csi
+      provisioner: nfs.csi.k8s.io
+      parameters:
+        server: 10.254.254.1
+        share: /srv
+        # csi.storage.k8s.io/provisioner-secret is only needed for providing mountOptions in DeleteVolume
+        # csi.storage.k8s.io/provisioner-secret-name: "mount-options"
+        # csi.storage.k8s.io/provisioner-secret-namespace: "default"
+      reclaimPolicy: Delete
+      volumeBindingMode: Immediate
+      allowVolumeExpansion: true
+      mountOptions:
+        - nfsvers=4.1
+      EOF
+      OUTEOF
       #
       cat <<OUTEOF > /home/$USER/.local/bin/metallb.sh
       #!/usr/bin/env bash
@@ -881,6 +917,11 @@ write_files:
         }
   owner: root:root
   path: /etc/docker/daemon.json
+  permissions: "0644"
+- content: |
+        /srv 10.254.254.0/24(rw,async,no_subtree_check,no_root_squash)
+  owner: root:root
+  path: /etc/exports
   permissions: "0644"
 # - content: |
 #         #!/usr/bin/env bash
